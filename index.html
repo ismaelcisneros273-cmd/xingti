@@ -119,18 +119,10 @@ html,body{margin:0;height:100%;background:#000;color:var(--ink);overflow:hidden;
 .qrbox img.qr{width:190px;height:190px;padding:12px;background:#fff;border-radius:14px}
 .qrbox .tip{margin-top:12px;font-size:12px;font-weight:300;line-height:1.8;color:rgba(236,232,222,.55)}
 .alink{display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-bottom:16px;padding:0 30px;border-radius:999px;background:#1677ff;color:#fff!important;text-decoration:none;font-size:15px;letter-spacing:.2em}
+.afdl{margin-top:22px;font-size:12px;font-weight:300;letter-spacing:.1em;color:rgba(236,232,222,.5)}.afdl a{color:var(--gold);text-underline-offset:4px}
 .psteps{margin-top:18px;font-size:12px;font-weight:300;letter-spacing:.15em;color:rgba(236,232,222,.5)}
 .paid{margin-top:18px;min-height:50px;padding:0 30px;border:1px solid rgba(236,232,222,.2);border-radius:999px;background:none;color:rgba(236,232,222,.45);font:400 14px 'Noto Serif SC',serif;letter-spacing:.2em}
 .paid.on{border-color:var(--gold);color:var(--gold);cursor:pointer}
-.buy{display:inline-flex;align-items:center;justify-content:center;min-height:50px;margin-top:34px;padding:0 34px;border-radius:999px;background:var(--gold);color:#0b0b10!important;text-decoration:none;font:500 15px 'Noto Serif SC',serif;letter-spacing:.2em}
-.crow{display:flex;gap:10px;max-width:320px;margin:22px auto 0}
-.crow input{flex:1;min-width:0;min-height:48px;padding:0 18px;border:1px solid rgba(236,232,222,.25);border-radius:999px;background:rgba(255,255,255,.04);color:#ece8de;font:400 14px ui-monospace,Menlo,monospace;letter-spacing:.12em;outline:none}
-.crow input:focus{border-color:var(--gold)}
-.crow input::placeholder{color:rgba(236,232,222,.35);font-family:'Noto Serif SC',serif;letter-spacing:.05em}
-.crow button{flex:none;min-height:48px;padding:0 22px;border:1px solid var(--gold);border-radius:999px;background:none;color:var(--gold);font:400 14px 'Noto Serif SC',serif;letter-spacing:.2em;cursor:pointer}
-.crow[hidden]{display:none}
-.hascode{margin-top:26px;padding:6px 10px;border:0;background:none;color:rgba(236,232,222,.45);font:300 12px 'Noto Serif SC',serif;letter-spacing:.15em;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
-.cmsg{min-height:1.6em;margin-top:16px;line-height:1.8;font-size:13px;font-weight:300;color:rgba(236,232,222,.7)}
 .confirm{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6)}
 .confirm.on{display:flex}
 .confirm .box{width:min(300px,84vw);padding:28px 22px;border:1px solid rgba(236,232,222,.15);border-radius:18px;background:#0b0c10;text-align:center}
@@ -221,14 +213,15 @@ html,body{margin:0;height:100%;background:#000;color:var(--ink);overflow:hidden;
 <section class="rep pay" id="pay" aria-label="解锁完整报告"><button class="x" id="pclose" type="button" aria-label="关闭">×</button><div class="rin">
 <h2>完整观测报告</h2><div class="price">¥1.9</div>
 <ul class="plist"><li>吵架的时候：你在冲突里的样子，和一句能救场的话</li><li>你和其他天体：最合拍与最容易拉扯的是谁</li><li>让轨道慢慢变稳的方法</li><li>一次解锁，8 种天体的报告全部可看</li></ul>
-<a class="buy" id="buyA" href="#" target="_blank" rel="noopener">去付款解锁</a>
-<p class="cmsg" id="cmsg" aria-live="polite">微信、支付宝都能付，付完回到这个页面会自动解锁</p>
-<button class="hascode" id="hasCode" type="button">已经有解锁码？</button>
-<div class="crow" id="crow" hidden><input id="codeIn" placeholder="输入解锁码，如 XT-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="codeGo" type="button">解锁</button></div>
+<div class="ptabs" id="ptabs"><button type="button" data-k="ali" class="on">支付宝</button><button type="button" data-k="wx">微信支付</button></div>
+<div class="qrbox" id="qrbox"></div>
+<div class="psteps">① 支付 ¥1.9　② 回到这个页面　③ 解锁报告</div>
+<button class="paid" id="paidBtn" type="button" disabled>请先完成支付</button>
+<p class="afdl" id="afdLine">不想扫码？也可以 <a href="#" id="afdA" target="_blank" rel="noopener">用爱发电付款</a>，付完自动解锁</p>
 </div></section>
 <section class="rep" id="duo" aria-label="双人合盘"><button class="x" id="dclose" type="button" aria-label="关闭">×</button><div class="rin" id="din"></div></section>
 <div class="confirm" id="confirm" role="dialog" aria-modal="true"><div class="box"><b id="cfT">确认已支付 ¥1.9？</b><p id="cfP">支付成功后才能查看完整报告</p><button class="yes" id="yes" type="button">确认已支付</button><button class="no" id="no" type="button">还没付，返回</button></div></div>
-
+<script src="qrcode.js"></script>
 <script src="reports.js"></script>
 <script src="pair.js"></script>
 <script>
@@ -387,35 +380,34 @@ let okTap=0;rin.addEventListener('click',e=>{if(e.target.id==='unl')openPay(cur)
 document.getElementById('rclose').onclick=()=>repEl.classList.remove('open');
 rin.addEventListener('click',e=>{const p=e.target.closest('[data-go]');if(p&&e.target.closest('#pay'))return;if(!p)return;repEl.classList.remove('open');open(byId[p.dataset.go])});
 
-const DPAID='xingti_duo';let memDuo=false;const isDuo=()=>{try{return memDuo||localStorage.getItem(DPAID)==='1'}catch(e){return memDuo}};
-const PAID='xingti_paid';
-let memPaid=false;const isPaid=()=>{try{return memPaid||localStorage.getItem(PAID)==='1'}catch(e){return memPaid}};
-const payEl=document.getElementById('pay'),buyA=document.getElementById('buyA'),codeIn=document.getElementById('codeIn'),cmsg=document.getElementById('cmsg');
-// 爱发电商品：付款后爱发电私信自动发一个解锁码；这里只存码的 SHA-256 前 20 位
-const HASH={duo:new Set(["4df2044ffddc51ed308a", "867b7ad403c5ea77cb2e", "bfab2e2d11b348ad725c", "9ef33ce91a28a9a1f0c3", "4313bd8b89cc510481e2", "da4e30a7cfabad6d7983", "9089c5d9fae7756cdc1a", "e29989c0157d06a67a1e", "4e5edcc79c28773b3104", "5fd1e6f480060be7979f", "af158c4d70382c6b362c", "b037be12177deb4bf35c", "0567cd1faf2033183e9a", "a56f93a5c648f37ee195", "36b42b492b223ca89ed6", "4c57a2a9ea3c6cc80db4", "e5adf0bec39cac57e87e", "982493bae50a5240bf08", "791b4458e8593bbed6c9", "200c5d4ce81b5f97f401", "47a30be62c3433cd64a6", "2b7c98e6aa97810b255e", "e64de823ad1022b0f979", "d3881a5c98b27312c20e", "6c17317ead64e6ffa800", "d388cc369b68ce3054aa", "49e6fb8eadd4eb7179f6", "18725cb234a3831d6858", "a68686ea70e68e9af816", "92217e9f6152204f038e", "b15cc0fb1927fca8f29e", "1a606174cfecb3ee71de", "c36a42dc7462a851dc10", "768564b6e04df8e515cd", "7682f9d174ff380db387", "91a8f9ab594dfa801f7b", "8ec9e5ee86cd9810816a", "74ecd5c44b7372417aa7", "e6ce2a4d154e66aa3555", "58f39f768942ae3883af", "3bdfda444313fe09a90c", "782b257d84970a483640", "12821d1c2eeaefccecd0", "553637e5ee77a070d8b6", "fb9974db487997b91980", "34df45c5b3f478001e6e", "13e4583f9c148a1a518e", "7f76f02a774d8d4a6f2c", "053058b455f4020d83f9", "da9e02507e22996fe0ba", "6e26f18a4be8b7d7bb3b", "85c5156e7fdee1019820", "87519f539881ebb3dc18", "382b069361be090ac4a8", "a9402e468b02abe32985", "edd74c2ec1ea978c0d34", "02ec6fbeaa39c7d0bf6a", "40ac4f8e799ecf450120", "39e701085936ad4840b9", "1b87df92b1ec79c8facd", "28be3fcf8c913fc221c3", "a0672f6c22b77a4f165f", "2ce9b96d700c95d6e48c", "a79fa3caa4400326adf0", "32bd51ba27f80035ec9e", "8af035df41286ccfe1ff", "674df5b781b18bc9fc69", "c1506f96a8d3e8ab9af6", "5f79384ad80852c07916", "b21c138d83be82ea1c40", "a3f596d0440af3f173ca", "3c881e1d510db1d92156", "c6f3d7ff088444d79c7b", "9c813155d80c5f76f742", "dfe5300cc55bf614ed5c", "45db5c9a35cd92aef3e9", "ae96a3878652e35970d2", "e8a9697f7e1851028f07", "aba286e2c50db66a97df", "65af8f101fa984743eeb", "6dbf99d679daf0e7ba85", "dd337c47cc7a095fd686", "ad025a7f48417e036e6b", "f4885044d7a09bfecf9b", "4840ce9c3cc5330a40a4", "3c81f4b061b1e5927f34", "44f59a36be908e7e21cb", "74984b332978a16fa9bb", "a4e5af961184cb62500d", "c83b0404628cac96396b", "5c2a3f3606edd5f5e7fe", "f66fa4a67880b8ba0e4b", "90034a9660878d4a59d9", "f76c750918ee4fe0a45b", "5d5c7944bbeecc0daf01", "baa58c1b1400af1c4a3c", "91dfc4eb05ab7081a1da", "5d55f7091cc0b17c4274", "1daaeebd611b30e91b05", "a615327b595fc669d163", "6a4f439be9babeac8c59", "db8417dcf03b3f99f1b1", "cb3d26bb1929f4bfc639", "b68ba01194f5eb405e3a", "a1814f44756098dfdfee", "68978c311fff17337cf5", "3da846b5674731b59e37", "2a3c4a10722dddb42e92", "95cd7e449d3d5dad84dc", "2e5002b1bdb0f437984c", "8472540938d7031b2ef1", "5bfdef2deae0904fa812", "e616881954e7c10f974d", "a800f6b0b3f58f19b2a9", "a7a3a543e6f2a1d8d618", "993a2f4c7062fe4c3eb8", "8dd5071ba962b87b9171", "21fa2e2793b89f2092a3", "690f5c8824df6e684db9", "cf9191d1bc767ffd7ace", "526741186a39035ed6d8", "12a7ceb106e600bdc59b", "da07fd026368cefed8c0", "b3e58db4b0cbf3d1a037", "41cdc8af97b43bbad4fe", "4a467139dcffcf9b21f9", "3e181b496ca190df89a2", "c4b3e853318ce8a4c21e", "bccb311b41348932cdfe", "97ee486364dfcf6ccc1b", "65ec1907903997da140b", "1e29518e5a7c120a2844", "1275842a5a888ff93251", "2fe1b309d228e7219432", "98336482a28eb6c76738", "0b16f516228564ed9aff", "1508adc6cf8e1892fd4f", "5c31ded5498cdeb3653a", "b404533b4f075ce7010e", "a91b3feba636c699dd80", "ce0e0444f067242bc868", "665a4573ce0f950c237d", "debac8493068c1881c05", "7724e66c3afaeb8119cb", "a29dfd26034fcad841c4", "c08880232e30edb0271e", "5e98fec3e1e26702aac5", "2d687ec11962f850502d", "75e846fe8a8ab44356c4", "93f7dddf90c4804987a6", "c2b76cc7fe06857a1d73", "975d022cefd676708a6f", "e33c2455f88e9a23454b", "c43ab6e704455fdd5c5b", "39e78d0bc00e53920d8b", "9f5516f48a44e852e472", "2b40115381f528952e86", "4d00b1b126bdba788f54", "14d31aa609b48223cd66", "e6f8b67cac8afe2db0b5", "9e17aee4443fe67e28f2", "b5c85224af62b0db51b0", "6a3dff71136928d7ecec", "540232c38334fc5a2995", "6de2d81e8ee9ff0edd05", "57c484a3204be48c3e7d", "1adb3ad7369be516b335", "8309ea6512e661021bea", "d8c5b7a1b24792ea9ca0", "d016c9678ca142afd0c2", "4c93f4713ff6f9f7bfda", "7d90b11819d81e11e01f", "3843f0a404362cf26380", "d6068f8a742d365df9ef", "ac8f87bf0651b17ba4b3", "0a4e48fd787ec8760925", "a3ad3d59fc89feab5386", "66bb5d0d6052c5a07e78", "08b0999a0be578cc4b1d", "16733863a5c6cb74cf2f", "db2ea9cf3305c312222b", "f7d7aa94a802fe1100d6", "ac9d2f8e73019d55bb6d", "c59ef9c626149febaf4e", "343f1213ece96f518cb3", "c6b5fee8ef8b290abcf9", "c21d819c91f86b9cb645", "d5cf22785b806f495233", "49f3bea7e91ff199fedc", "51d95d0dfc7202710333", "c347e851863df06d2b2f", "a687d6be4fe98d96fd11", "f7fe2fa0aa83ce6f6311", "f89cd6ca90924bb0e2aa", "80402d85a15cc9a1bb0f", "13d7e40daecc03be4f7b", "8a70d5e6b9c07386fc3b", "51cb0a1457be953c99f2", "2f5ccc37144b2960750d", "21ca560dbb15032c1a8a"])};
-let pending=null,payKind='rep';const PK={rep:{t:'完整观测报告',p:'¥1.9',l:['吵架的时候：你在冲突里的样子，和一句能救场的话','你和其他天体：最合拍与最容易拉扯的是谁','让轨道慢慢变稳的方法','一次解锁，8 种天体的报告全部可看'],c:'支付成功后才能查看完整报告'},
- duo:{t:'双人合盘',p:'¥3.9',l:['你们之间的引力：你们为什么会这样相处','三个你们一定经历过的瞬间','你们的牵挂和距离感，放在一起比一比','对彼此最管用的一句话','一起把轨道走稳的方法','解锁一次，和不同的人合盘都不用再付'],c:'支付成功后才能查看完整合盘'}};
-function openPay(b,k='rep'){pending=b;payKind=k;const o=PK[k];payEl.querySelector('h2').textContent=o.t;payEl.querySelector('.price').textContent=o.p;payEl.querySelector('.plist').innerHTML=o.l.map(x=>`<li>${x}</li>`).join('');buyA.href=afdLink();buyA.textContent=`去付款解锁 · ${o.p}`;codeIn.value='';if(!afdTimer)cmsg.textContent=AFD_HINT;payEl.scrollTop=0;payEl.classList.add('open')}
-document.getElementById('pclose').onclick=()=>payEl.classList.remove('open');
-async function tryCode(){const c=codeIn.value.toUpperCase().replace(/\s+/g,'');if(!c){cmsg.textContent='先把解锁码填进来';return}
- let h='';try{const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(c));h=[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,20)}catch(e){cmsg.textContent='这个浏览器验证不了，换个浏览器试试';return}
- if(!(HASH.duo.has(h))){cmsg.textContent='这个码对不上，再核对一下';return}
- duoPaid()}
-function duoPaid(){afdStop();memDuo=true;try{localStorage.setItem(DPAID,'1')}catch(e){}if(payEl.classList.contains('open')){payEl.classList.remove('open');duoResult(true)}}
-// 自动解锁：带着「解锁编号」去爱发电付款，回来问 yunachen.cn 有没有这笔订单
-const AFD={plan:'61cef380e8c011f1b4d752540025c377',sku:'61d2b178e8c011f18a8552540025c377',api:'https://www.yunachen.cn/api/paid'},AFD_HINT='微信、支付宝都能付，付完回到这个页面会自动解锁';
+const AFD={p:'xt',plan:'61cef380e8c011f1b4d752540025c377',sku:'61d2b178e8c011f18a8552540025c377',api:'https://www.yunachen.cn/api/paid'};
 const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lss=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 let afdMem='';function afdId(){let id=lsg('afd_xt')||afdMem;if(!/^[A-HJ-NP-Z2-9]{8}$/.test(id||'')){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',b=new Uint32Array(8);crypto.getRandomValues(b);id=[...b].map(x=>A[x%A.length]).join('');lss('afd_xt',id)}return afdMem=id}
-function afdLink(){const id=afdId();return 'https://afdian.com/order/create?product_type=1&plan_id='+AFD.plan+'&sku='+encodeURIComponent(JSON.stringify([{sku_id:AFD.sku,count:1}]))+'&viokrz_ex=0&custom_order_id='+id+'&remark='+encodeURIComponent('解锁编号 '+id+'（付完回到测试页会自动解锁）')}
-let afdTimer=null,afdUntil=0,afdBusy=false;
-async function afdCheck(){if(afdBusy||isDuo())return;afdBusy=true;try{const d=await fetch(AFD.api+'?p=xt&id='+afdId(),{cache:'no-store'}).then(r=>r.json());if(d.paid){duoPaid();cmsg.textContent='付款成功，合盘已解锁 ✦'}}catch(e){}afdBusy=false}
-function afdStop(){clearInterval(afdTimer);afdTimer=null;lss('afd_wait_xt','')}
-function afdWatch(){afdUntil=Date.now()+20*60*1000;cmsg.textContent='付完回到这个页面，会自动解锁（正在等付款结果…）';if(!afdTimer)afdTimer=setInterval(()=>{if(Date.now()>afdUntil){clearInterval(afdTimer);afdTimer=null;return}if(!document.hidden)afdCheck()},4000)}
-buyA.addEventListener('click',()=>{buyA.href=afdLink();lss('afd_wait_xt',String(Date.now()));afdWatch()});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&afdTimer)afdCheck()});
-{const t=+(lsg('afd_wait_xt')||0);if(t&&Date.now()-t<3*864e5&&!isDuo()){afdWatch();afdCheck()}}
-document.getElementById('hasCode').onclick=()=>{const c=document.getElementById('crow');c.hidden=!c.hidden;if(!c.hidden)codeIn.focus()};
-document.getElementById('codeGo').onclick=tryCode;codeIn.addEventListener('keydown',e=>{if(e.key==='Enter')tryCode()});
+function afdLink(){const id=afdId();return 'https://afdian.com/order/create?product_type=1&plan_id='+AFD.plan+'&sku='+encodeURIComponent(JSON.stringify([{sku_id:AFD.sku,count:1}]))+'&viokrz_ex=0&custom_order_id='+id+'&remark='+encodeURIComponent('解锁编号 '+id+'（付完回到合盘页会自动解锁）')}
+let afdT=null,afdUntil=0,afdBusy=false;
+async function afdCheck(){if(afdBusy||isDuo())return;afdBusy=true;try{const d=await fetch(AFD.api+'?p=xt&id='+afdId(),{cache:'no-store'}).then(r=>r.json());if(d.paid){memDuo=true;lss(DPAID,'1');afdStop();payEl.classList.remove('open');if(duoEl.classList.contains('open'))duoResult(true)}}catch(e){}afdBusy=false}
+function afdStop(){clearInterval(afdT);afdT=null;lss('afd_wait_xt','')}
+function afdWatch(){afdUntil=Date.now()+20*60*1000;if(!afdT)afdT=setInterval(()=>{if(Date.now()>afdUntil){clearInterval(afdT);afdT=null;return}if(!document.hidden)afdCheck()},4000)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&afdT)afdCheck()});
+const DPAID='xingti_duo';let memDuo=false;const isDuo=()=>{try{return memDuo||localStorage.getItem(DPAID)==='1'}catch(e){return memDuo}};
+const WX_PAY='wxp://f2f0Nekq3buN1Po2DgbR1Y0oNYOHi6JWSJiyjif45zNL7Gk',ALI_URL='https://qr.alipay.com/fkx165413lhqxh7ayhpvred',PAID='xingti_paid';
+let memPaid=false;const isPaid=()=>{try{return memPaid||localStorage.getItem(PAID)==='1'}catch(e){return memPaid}};
+const payEl=document.getElementById('pay'),qrbox=document.getElementById('qrbox'),paidBtn=document.getElementById('paidBtn'),conf=document.getElementById('confirm');
+const qrImg=t=>{try{const q=qrcode(0,'M');q.addData(t);q.make();return q.createDataURL(6,8)}catch(e){return''}};
+let ready=false,timer=null;function arm(sec){if(ready||timer)return;let n=sec;const tick=()=>{if(n<=0){clearInterval(timer);timer=null;ready=true;paidBtn.disabled=false;paidBtn.classList.add('on');paidBtn.textContent='我已完成支付，查看报告';return}paidBtn.textContent=`支付完成后可点击（${n}s）`;n--};tick();timer=setInterval(tick,1000)}
+function tab(k){document.querySelectorAll('#ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+ if(k==='wx'){qrbox.innerHTML=`<img class="qr" src="${qrImg(WX_PAY)}" alt="微信收款码"><div class="tip">长按图片保存到相册，再打开微信「扫一扫」，从相册选这张图</div>`;arm(12)}
+ else{qrbox.innerHTML=`<a class="alink" href="${ALI_URL}" target="_blank" rel="noopener">打开支付宝付款</a><br><img class="qr" src="${qrImg(ALI_URL)}" alt="支付宝收款码"><div class="tip">在电脑上看的话，用手机支付宝扫上面的码</div>`;qrbox.querySelector('.alink').addEventListener('click',()=>arm(6))}}
+document.getElementById('ptabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)tab(b.dataset.k)});
+let pending=null,payKind='rep';const PK={rep:{t:'完整观测报告',p:'¥1.9',l:['吵架的时候：你在冲突里的样子，和一句能救场的话','你和其他天体：最合拍与最容易拉扯的是谁','让轨道慢慢变稳的方法','一次解锁，8 种天体的报告全部可看'],c:'支付成功后才能查看完整报告'},
+ duo:{t:'双人合盘',p:'¥3.9',l:['你们之间的引力：你们为什么会这样相处','三个你们一定经历过的瞬间','你们的牵挂和距离感，放在一起比一比','对彼此最管用的一句话','一起把轨道走稳的方法','解锁一次，和不同的人合盘都不用再付'],c:'支付成功后才能查看完整合盘'}};
+function openPay(b,k='rep'){pending=b;payKind=k;const o=PK[k];payEl.querySelector('h2').textContent=o.t;payEl.querySelector('.price').textContent=o.p;payEl.querySelector('.plist').innerHTML=o.l.map(x=>`<li>${x}</li>`).join('');payEl.querySelector('.psteps').textContent=`① 支付 ${o.p}　② 回到这个页面　③ 解锁${k==='duo'?'合盘':'报告'}`;document.getElementById('cfT').textContent=`确认已支付 ${o.p}？`;document.getElementById('cfP').textContent=o.c;const al=document.getElementById('afdLine');al.style.display=k==='duo'?'':'none';if(k==='duo')document.getElementById('afdA').href=afdLink();tab('ali');payEl.scrollTop=0;payEl.classList.add('open')}
+document.getElementById('afdA').addEventListener('click',e=>{e.currentTarget.href=afdLink();lss('afd_wait_xt',String(Date.now()));afdWatch()});
+{const t=+(lsg('afd_wait_xt')||0);if(t&&Date.now()-t<3*864e5){afdWatch();setTimeout(afdCheck,800)}}
+document.getElementById('pclose').onclick=()=>payEl.classList.remove('open');
+paidBtn.onclick=()=>{if(ready)conf.classList.add('on')};
+document.getElementById('no').onclick=()=>conf.classList.remove('on');
+document.getElementById('yes').onclick=()=>{conf.classList.remove('on');if(payKind==='duo'){memDuo=true;try{localStorage.setItem(DPAID,'1')}catch(e){}payEl.classList.remove('open');duoResult(true);return}memPaid=true;try{localStorage.setItem(PAID,'1')}catch(e){}payEl.classList.remove('open');if(pending){openRep(pending);requestAnimationFrame(()=>{const h=[...rin.querySelectorAll('.sec h3')].find(x=>x.textContent==='吵架的时候');if(h)h.parentNode.scrollIntoView({block:'start'})})}};
 const moreBtn=document.getElementById('more');
 // birthday moon
 const PH=[['新月','你出生那晚，月亮几乎整个藏进了暗处。你习惯把光收着，不是没有，是在等一个对的人看见。'],['蛾眉月','那一晚只亮了细细一弯。你的温柔是一点一点给的，可给出去的每一分都是真的。'],['上弦月','那一晚的月亮亮着一半、暗着一半。你身上的两面差不多一样重，所以你比谁都懂，平衡有多难。'],['盈凸月','月亮快要圆了，只差一点点。你总觉得自己还不够好，其实早就已经很亮了。'],['满月','你出生在满月的夜里。你习惯把整个自己都给出去，所以也最怕被辜负。'],['亏凸月','满月刚刚过去，光还很足。你见过最亮的时刻，所以更懂得珍惜身边的光。'],['下弦月','亮着的那一半，正慢慢让给暗处。你懂得放手，也懂得在安静里照顾好自己。'],['残月','那是黎明前的最后一弯。你习惯在别人看不见的时候发光，比如凌晨，比如一个人的时候。']];
