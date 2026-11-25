@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>引力观测站 · 你在亲密关系里，是哪一种引力</title>
+<meta name="description" content="二十个瞬间，看看你在亲密关系里是哪一种天体。附出生那晚的月亮、双人合盘。">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="favicon-32.png" sizes="32x32"><link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="引力观测站"><meta property="og:description" content="你在亲密关系里，是哪一种引力"><meta property="og:image" content="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE  tender, quiet, nocturnal
+   IDEA   a real night sky you have to wander through to find each body
+   PICTURE one vast black canvas; at 1:1 only one body fits the screen
+   COLOUR and TYPE  black, moonlight ivory, one pale gold; Noto Serif SC
+   LAYOUT full-bleed canvas, brand top-left, view toggle bottom-right, sheet rises from below */
+:root{color-scheme:dark;--ink:#ECE8DE;--mute:rgba(236,232,222,.55);--gold:#D9C9A3}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;background:#000;color:var(--ink);overflow:hidden;font-family:'Noto Serif SC',serif;-webkit-font-smoothing:antialiased}
+#sky{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:grab;display:block}
+#sky.drag{cursor:grabbing}
+#tags{position:fixed;inset:0;pointer-events:none}
+.tag{position:absolute;left:0;top:0;white-space:nowrap;will-change:transform;transition:opacity .5s}
+.tag b{display:block;font-weight:400;font-size:15px;letter-spacing:.42em;color:rgba(244,240,230,.92)}
+.tag i{display:block;font-style:normal;font-weight:300;font-size:12px;letter-spacing:.2em;color:var(--mute);margin-top:8px;transition:opacity .5s}
+.brand{position:fixed;left:max(22px,env(safe-area-inset-left));top:max(20px,env(safe-area-inset-top));font-size:13px;letter-spacing:.6em;color:rgba(244,240,230,.75);pointer-events:none}
+.hint{position:fixed;left:0;right:0;bottom:calc(34px + env(safe-area-inset-bottom));text-align:center;font-size:12px;font-weight:300;letter-spacing:.45em;color:var(--mute);pointer-events:none;transition:opacity 1.6s}
+.hint.gone{opacity:0}
+.view{position:fixed;right:max(16px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));min-height:44px;padding:0 18px;border:1px solid rgba(236,232,222,.22);border-radius:999px;background:rgba(0,0,0,.35);color:rgba(244,240,230,.8);font:300 12px 'Noto Serif SC',serif;letter-spacing:.3em;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.view:focus-visible,.sheet button:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+.sheet{position:fixed;left:0;right:0;bottom:0;padding:64px max(28px,6vw) calc(36px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(0,0,0,.94) 55%,rgba(0,0,0,0));transform:translateY(110%);transition:transform .8s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.sheet.open{transform:none;pointer-events:auto}
+.sheet .in{max-width:520px;margin:0 auto}
+.sheet h2{margin:0;font-weight:600;font-size:32px;letter-spacing:.3em;line-height:1.1}
+.sheet .type{margin-top:12px;font-size:16px;letter-spacing:.3em;color:var(--gold)}
+.sheet .line{margin:22px 0 0;font-size:18px;line-height:1.8;letter-spacing:.08em}
+.sheet .body{margin:12px 0 0;font-size:15px;font-weight:300;line-height:2;color:rgba(236,232,222,.72)}
+.sheet .cr{margin-top:18px;font-size:10px;letter-spacing:.08em;color:rgba(236,232,222,.35)}
+.sheet .foot{margin-top:22px;font-size:12px;font-weight:300;letter-spacing:.25em;color:rgba(236,232,222,.4)}
+.sheet .x{position:absolute;right:max(14px,4vw);top:20px;width:44px;height:44px;border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer}
+.reading .credit,.reading .hint{opacity:0}
+.credit{position:fixed;left:max(22px,env(safe-area-inset-left));bottom:calc(12px + env(safe-area-inset-bottom));font-size:9px;letter-spacing:.2em;color:rgba(236,232,222,.25);pointer-events:none}
+
+.pre #sky{opacity:0}
+#sky{transition:opacity 1.4s}
+.pre .brand,.pre .view,.pre .hint,.pre .credit,.pre #tags{opacity:0;pointer-events:none}
+.brand,.view,.hint,.credit,#tags{transition:opacity 1.2s}
+.stage{position:fixed;inset:0;background:#000;transition:opacity 1.4s;z-index:5}
+.stage.hide{opacity:0;pointer-events:none}
+#cc{position:absolute;inset:0;width:100%;height:100%}
+#cover>*:not(#cc){position:relative}
+#cover{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.seed{width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,#fff 0 4%,rgba(244,236,216,.55) 12%,rgba(217,201,163,.12) 38%,rgba(0,0,0,0) 70%);animation:breathe 5s ease-in-out infinite;margin-bottom:40px}
+@keyframes breathe{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1.1);opacity:1}}
+#cover h1{margin:0;font-weight:600;font-size:clamp(34px,10vw,52px);letter-spacing:.35em;padding-left:.35em;line-height:1.1}
+#cover .sub{margin:22px 0 0;font-size:16px;font-weight:300;letter-spacing:.2em;color:rgba(236,232,222,.78)}
+#cover .meta{margin:10px 0 0;font-size:12px;font-weight:300;letter-spacing:.3em;color:var(--mute)}
+.go{margin-top:56px;min-height:50px;padding:0 40px;border:1px solid rgba(217,201,163,.6);border-radius:999px;background:none;color:var(--gold);font:400 15px 'Noto Serif SC',serif;letter-spacing:.45em;cursor:pointer}
+.skip{margin-top:14px;min-height:44px;padding:0 16px;border:0;background:none;color:rgba(236,232,222,.45);font:300 12px 'Noto Serif SC',serif;letter-spacing:.3em;cursor:pointer}
+#qc{position:absolute;inset:0;width:100%;height:100%}
+.qbox{position:absolute;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));padding:0 26px;text-align:center}
+.q{max-width:440px;margin:0 auto;min-height:3.8em;font-size:19px;line-height:1.9;letter-spacing:.06em;transition:opacity .45s}
+.q.fade{opacity:0}
+.scale{display:flex;justify-content:center;align-items:center;gap:4px;margin-top:26px;transition:opacity .45s}
+.scale button{width:54px;height:54px;border:0;border-radius:50%;background:none;display:grid;place-items:center;cursor:pointer}
+.scale button span{display:block;border-radius:50%;background:#F4ECD8;transition:transform .3s}
+.scale button:hover span{transform:scale(1.35)}
+.ends{display:flex;justify-content:space-between;max-width:290px;margin:12px auto 0;font-size:11px;font-weight:300;letter-spacing:.3em;color:var(--mute);transition:opacity .45s}
+.go:focus-visible,.skip:focus-visible,.scale button:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+.tag em{font-style:normal;font-size:11px;color:var(--gold);margin-left:.7em;letter-spacing:.2em}
+.sheet .score{margin-top:10px;font-size:12px;font-weight:300;letter-spacing:.3em;color:rgba(236,232,222,.55)}
+
+.more{margin-top:20px;min-height:44px;padding:0 22px;border:1px solid rgba(217,201,163,.5);border-radius:999px;background:none;color:var(--gold);font:400 13px 'Noto Serif SC',serif;letter-spacing:.3em;cursor:pointer}
+.rep{position:fixed;inset:0;z-index:8;background:rgba(0,0,0,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);overflow-y:auto;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transition:opacity .9s}
+.rep.open{opacity:1;pointer-events:auto}
+.rep .x{position:fixed;right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));width:44px;height:44px;border:0;background:none;color:var(--mute);font-size:24px;cursor:pointer;z-index:2}
+.rin{max-width:520px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top)) 28px calc(80px + env(safe-area-inset-bottom))}
+.hero{display:block;width:min(240px,62vw);height:auto;margin:0 auto 34px}
+.rin h2{margin:0;text-align:center;font-weight:600;font-size:36px;letter-spacing:.3em;padding-left:.3em}
+.rin .rt{margin-top:12px;text-align:center;font-size:16px;letter-spacing:.3em;color:var(--gold)}
+.rin .rs{margin-top:8px;text-align:center;font-size:12px;font-weight:300;letter-spacing:.25em;color:rgba(236,232,222,.5)}
+.rin .rl{margin:26px 0 0;text-align:center;font-size:19px;line-height:1.8;letter-spacing:.08em}
+.sec{margin-top:58px}
+.paidok{margin:46px 0 0;text-align:center;font-size:12px;letter-spacing:.3em;color:rgba(217,201,163,.5);user-select:none;-webkit-user-select:none}
+.lock{position:relative;margin-top:58px;padding:6px 0 4px;text-align:center}
+.lk{margin-bottom:34px}.lk h3{display:flex;align-items:center;gap:14px;margin:0 0 18px;font-weight:400;font-size:12px;letter-spacing:.45em;color:rgba(236,232,222,.42)}
+.lk h3::before,.lk h3::after{content:"";flex:1;height:1px;background:rgba(236,232,222,.1)}
+.blur i{display:block;height:11px;margin:0 0 15px;border-radius:6px;background:linear-gradient(90deg,rgba(236,232,222,.13),rgba(236,232,222,.05));filter:blur(3px)}
+.unl{margin-top:6px;padding:15px 34px;border:1px solid rgba(217,201,163,.55);border-radius:40px;background:rgba(217,201,163,.08);color:#efe4c6;font:inherit;font-size:15px;letter-spacing:.18em;cursor:pointer;box-shadow:0 0 30px rgba(217,201,163,.12)}
+.lt{margin:14px 0 0!important;font-size:12.5px!important;color:rgba(236,232,222,.42)!important;letter-spacing:.1em}
+.sec h3{display:flex;align-items:center;gap:14px;margin:0 0 20px;font-weight:400;font-size:12px;letter-spacing:.45em;color:rgba(236,232,222,.55)}
+.sec h3::before,.sec h3::after{content:"";flex:1;height:1px;background:rgba(236,232,222,.14)}
+.sec p{margin:0;font-size:15.5px;font-weight:300;line-height:2.05;color:rgba(236,232,222,.8)}
+.scene{display:flex;gap:14px;margin:0 0 16px!important;font-size:16px!important;font-weight:400!important;color:rgba(244,240,230,.9)!important}
+.scene::before{content:"";flex:none;width:5px;height:5px;margin-top:.85em;border-radius:50%;background:#F4ECD8;box-shadow:0 0 8px 2px rgba(244,236,216,.35)}
+.pair{display:flex;gap:16px;align-items:flex-start;width:100%;margin-top:18px;padding:16px 0;border:0;border-top:1px solid rgba(236,232,222,.1);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.pair img{flex:none;width:64px;height:64px;object-fit:contain}
+.pair .pk{font-size:11px;letter-spacing:.35em;color:var(--gold)}
+.pair .pn{margin-top:4px;font-size:17px;letter-spacing:.2em}
+.pair .pd{margin-top:8px;font-size:14px;font-weight:300;line-height:1.9;color:rgba(236,232,222,.72)}
+.grow{margin-top:8px;text-align:center;font-size:17px!important;font-weight:400!important;line-height:2!important;color:#F4F0E6!important}
+.rin .rc{margin-top:64px;text-align:center;font-size:10px;letter-spacing:.1em;color:rgba(236,232,222,.3)}
+.more:focus-visible,.rep .x:focus-visible,.pair:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+
+#pay{z-index:9}
+.pay .rin{text-align:center}
+.pay h2{font-size:28px!important}
+.price{margin-top:14px;font-size:34px;font-weight:300;letter-spacing:.05em;color:var(--gold)}
+.plist{margin:30px auto 0;padding:0;list-style:none;max-width:320px;text-align:left}
+.plist li{display:flex;gap:12px;margin-bottom:14px;font-size:15px;font-weight:300;line-height:1.8;color:rgba(236,232,222,.82)}
+.plist li::before{content:"";flex:none;width:5px;height:5px;margin-top:.8em;border-radius:50%;background:var(--gold);box-shadow:0 0 8px 2px rgba(217,201,163,.4)}
+.ptabs{display:flex;justify-content:center;gap:10px;margin-top:34px}
+.ptabs button{min-height:44px;padding:0 22px;border:1px solid rgba(236,232,222,.25);border-radius:999px;background:none;color:rgba(236,232,222,.7);font:400 13px 'Noto Serif SC',serif;letter-spacing:.2em;cursor:pointer}
+.ptabs button.on{border-color:var(--gold);color:var(--gold)}
+.qrbox{margin-top:22px}
+.qrbox img.qr{width:190px;height:190px;padding:12px;background:#fff;border-radius:14px}
+.qrbox .tip{margin-top:12px;font-size:12px;font-weight:300;line-height:1.8;color:rgba(236,232,222,.55)}
+.alink{display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-bottom:16px;padding:0 30px;border-radius:999px;background:#1677ff;color:#fff!important;text-decoration:none;font-size:15px;letter-spacing:.2em}
+.psteps{margin-top:18px;font-size:12px;font-weight:300;letter-spacing:.15em;color:rgba(236,232,222,.5)}
+.paid{margin-top:18px;min-height:50px;padding:0 30px;border:1px solid rgba(236,232,222,.2);border-radius:999px;background:none;color:rgba(236,232,222,.45);font:400 14px 'Noto Serif SC',serif;letter-spacing:.2em}
+.paid.on{border-color:var(--gold);color:var(--gold);cursor:pointer}
+.confirm{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6)}
+.confirm.on{display:flex}
+.confirm .box{width:min(300px,84vw);padding:28px 22px;border:1px solid rgba(236,232,222,.15);border-radius:18px;background:#0b0c10;text-align:center}
+.confirm b{display:block;font-weight:400;font-size:18px;letter-spacing:.1em}
+.confirm p{margin:10px 0 20px;font-size:12px;font-weight:300;color:rgba(236,232,222,.55)}
+.confirm button{display:block;width:100%;min-height:46px;margin-top:10px;border-radius:999px;font:400 14px 'Noto Serif SC',serif;letter-spacing:.2em;cursor:pointer}
+.confirm .yes{border:1px solid var(--gold);background:none;color:var(--gold)}
+.confirm .no{border:0;background:none;color:rgba(236,232,222,.5)}
+.bmoon{text-align:center}
+.bmoon .row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.bmoon input{min-height:46px;padding:0 14px;border:1px solid rgba(236,232,222,.25);border-radius:12px;background:rgba(255,255,255,.04);color:var(--ink);font:400 16px 'Noto Serif SC',serif;color-scheme:dark}
+.bmoon .go2{min-height:46px;padding:0 20px;border:1px solid rgba(217,201,163,.6);border-radius:999px;background:none;color:var(--gold);font:400 14px 'Noto Serif SC',serif;letter-spacing:.2em;cursor:pointer}
+#bmc{display:block;width:220px;height:220px;margin:30px auto 0}
+.bmoon .bn{margin-top:22px;font-size:22px;letter-spacing:.3em}
+.bmoon .bd{margin-top:8px;font-size:12px;font-weight:300;letter-spacing:.2em;color:rgba(236,232,222,.5)}
+.bmoon .bt{margin-top:20px!important;font-size:16px!important;line-height:2!important;color:rgba(244,240,230,.9)!important}
+.bmoon .bh{margin-top:14px!important;font-size:13px!important;color:rgba(236,232,222,.5)!important}
+.more.ghost{margin-left:8px;border-color:rgba(236,232,222,.22);color:rgba(236,232,222,.7)}
+#duo .rin{text-align:center}
+.dsub{margin:12px 0 0!important;font-size:14px!important;color:rgba(236,232,222,.55)!important;letter-spacing:.15em}
+.slots{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:34px}
+.slot{width:128px;padding:14px 6px 12px;border:1px solid rgba(236,232,222,.14);border-radius:18px;background:rgba(255,255,255,.02);color:inherit;font:inherit;cursor:pointer}
+.slot.on{border-color:var(--gold)}
+.slot .sim{width:78px;height:78px;margin:0 auto;display:grid;place-items:center}
+.slot .sim img{max-width:78px;max-height:78px;object-fit:contain}
+.slot .sim i{width:46px;height:46px;border-radius:50%;border:1px dashed rgba(236,232,222,.3)}
+.slot b{display:block;margin-top:10px;font-weight:400;font-size:11px;letter-spacing:.35em;color:var(--gold)}
+.slot span{display:block;margin-top:4px;font-size:14px;letter-spacing:.12em}
+.slot small{display:block;margin-top:3px;font-size:10px;color:rgba(236,232,222,.4);letter-spacing:.1em}
+.amp{font-size:20px;font-weight:300;color:rgba(236,232,222,.4)}
+.picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+.picker button{padding:8px 2px;border:1px solid transparent;border-radius:12px;background:none;color:rgba(236,232,222,.75);font:inherit;font-size:11px;letter-spacing:.05em;cursor:pointer}
+.picker button.on{border-color:rgba(217,201,163,.5)}
+.picker img{display:block;width:54px;height:54px;margin:0 auto 6px;object-fit:contain}
+.ptip{margin:14px 0 0!important;font-size:12px!important;color:rgba(236,232,222,.45)!important}
+.bdrow{display:flex;justify-content:center;gap:12px;margin-top:26px;flex-wrap:wrap}
+.bdrow label{display:flex;flex-direction:column;gap:6px;font-size:11px;letter-spacing:.3em;color:rgba(236,232,222,.5)}
+.bdrow input{min-height:44px;width:150px;padding:0 10px;border:1px solid rgba(236,232,222,.25);border-radius:12px;background:rgba(255,255,255,.04);color:var(--ink);font:400 14px 'Noto Serif SC',serif;color-scheme:dark}
+#dgo{margin-top:26px}
+.inv{margin-top:26px}.inv button{border:0;background:none;color:rgba(236,232,222,.6);font:inherit;font-size:13px;letter-spacing:.15em;text-decoration:underline;text-underline-offset:5px;cursor:pointer}
+.inv p{margin:8px 0 0!important;font-size:11.5px!important;line-height:1.8!important;color:rgba(236,232,222,.45)!important;word-break:break-all}
+.duoband{position:relative;display:flex;justify-content:center;align-items:center;gap:18px;margin-top:70px}
+.duoband img{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(220,225,240,.12))}
+.duoband .ln{width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(217,201,163,.7),transparent);box-shadow:0 0 10px rgba(217,201,163,.5)}
+.dnames{display:flex;justify-content:center;gap:70px;margin-top:12px;font-size:12px;letter-spacing:.25em;color:rgba(236,232,222,.6)}
+.dtitle{margin-top:34px;font-size:30px;font-weight:600;letter-spacing:.3em;padding-left:.3em}
+.dline{margin:18px 0 0!important;font-size:17px!important;line-height:1.95!important;color:#F4F0E6!important}
+.dmoons{display:flex;justify-content:center;gap:24px;margin-top:22px}
+.dmoons div{font-size:12px;letter-spacing:.15em;color:rgba(236,232,222,.6)}
+.dmoons canvas{display:block;width:120px;height:120px;margin:0 auto 10px}
+.dmoons b{display:block;margin-top:4px;font-weight:400;font-size:15px;color:#efe8d6;letter-spacing:.2em}
+#duo .sec{text-align:left}#duo .sec.c{text-align:center}
+.pro{margin-top:16px!important;padding:14px 16px;border-left:1px solid rgba(217,201,163,.45);font-size:13.5px!important;line-height:1.95!important;color:rgba(236,232,222,.62)!important}
+.cmp{margin-top:6px}
+.cmpr{margin-bottom:22px}
+.cmpr .cl{display:flex;justify-content:space-between;font-size:13px;letter-spacing:.12em;color:rgba(236,232,222,.8)}
+.cmpr .cl em{font-style:normal;font-size:11px;color:rgba(236,232,222,.4);letter-spacing:.05em}
+.bar{position:relative;height:6px;margin-top:9px;border-radius:3px;background:rgba(236,232,222,.08)}
+.bar i{position:absolute;left:0;top:0;height:100%;border-radius:3px}
+.bar .m{background:linear-gradient(90deg,rgba(217,201,163,.3),rgba(217,201,163,.95))}
+.bar .t{background:linear-gradient(90deg,rgba(140,180,240,.3),rgba(150,190,255,.95))}
+.bar+.bar{margin-top:6px}
+.leg{display:flex;gap:18px;justify-content:center;margin-bottom:22px;font-size:11px;letter-spacing:.2em;color:rgba(236,232,222,.55)}
+.leg i{display:inline-block;width:14px;height:4px;margin-right:6px;border-radius:2px;vertical-align:middle}
+.say{margin-bottom:22px}.say .who{font-size:11px;letter-spacing:.35em;color:var(--gold)}
+.say .q2{margin:8px 0 0!important;font-size:18px!important;color:#F4F0E6!important;letter-spacing:.08em}
+.say .why{margin-top:6px!important;font-size:13.5px!important;line-height:1.9!important;color:rgba(236,232,222,.6)!important}
+.duoin{text-align:center}.duoin p{text-align:center}
+@media (prefers-reduced-motion:reduce){.rep{transition:none}}
+@media (prefers-reduced-motion:reduce){.seed{animation:none}}
+@media (prefers-reduced-motion:reduce){.sheet,.hint,.tag{transition:none}}
+</style>
+</head>
+<body class="pre">
+<canvas id="sky" aria-label="一片可以拖动和缩放的星空，散落着八种天体"></canvas>
+<div id="tags"></div>
+<div class="brand">引力观测站</div>
+<button class="view" id="view" type="button">全景</button>
+<div class="hint" id="hint">拖动 · 去黑暗里找其他的星</div>
+<div class="credit">影像 NASA · ESO · ESA/Webb · ESA/Rosetta · 银河 ESO/S. Brunier</div>
+<section class="stage" id="cover"><canvas id="cc" aria-hidden="true"></canvas><div class="seed" aria-hidden="true"></div><h1>引力观测站</h1><p class="sub">你在亲密关系里，是哪一种引力</p><p class="meta">二十个瞬间 · 约三分钟</p><button class="go" id="go" type="button">开始观测</button><button class="skip" id="skip" type="button">先看看星空</button></section>
+<section class="stage hide" id="quiz" aria-live="polite"><canvas id="qc" aria-hidden="true"></canvas><div class="qbox"><p class="q" id="qt"></p><div class="scale" id="scale"></div><div class="ends" id="ends"><span>不像我</span><span>很像我</span></div></div></section>
+<section class="sheet" id="sheet" aria-live="polite">
+<button class="x" id="close" type="button" aria-label="关闭">×</button>
+<div class="in"><h2 id="sName"></h2><div class="type" id="sType"></div><div class="score" id="sScore"></div><p class="line" id="sLine"></p><p class="body" id="sBody"></p><button class="more" id="more" type="button">展开完整报告</button><button class="more ghost" id="duoBtn" type="button">和 TA 合盘</button><div class="cr" id="sCr"></div><div class="foot" id="sFoot">轻触空白处，继续漫游</div></div>
+</section>
+<section class="rep" id="rep" aria-label="完整报告"><button class="x" id="rclose" type="button" aria-label="关闭报告">×</button><div class="rin" id="rin"></div></section>
+<section class="rep pay" id="pay" aria-label="解锁完整报告"><button class="x" id="pclose" type="button" aria-label="关闭">×</button><div class="rin">
+<h2>完整观测报告</h2><div class="price">¥1.9</div>
+<ul class="plist"><li>吵架的时候：你在冲突里的样子，和一句能救场的话</li><li>你和其他天体：最合拍与最容易拉扯的是谁</li><li>让轨道慢慢变稳的方法</li><li>一次解锁，8 种天体的报告全部可看</li></ul>
+<div class="ptabs" id="ptabs"><button type="button" data-k="ali" class="on">支付宝</button><button type="button" data-k="wx">微信支付</button></div>
+<div class="qrbox" id="qrbox"></div>
+<div class="psteps">① 支付 ¥1.9　② 回到这个页面　③ 解锁报告</div>
+<button class="paid" id="paidBtn" type="button" disabled>请先完成支付</button>
+<p class="psteps" style="margin-top:22px">解锁一次，这台手机以后都能看全部 8 份报告</p>
+</div></section>
+<section class="rep" id="duo" aria-label="双人合盘"><button class="x" id="dclose" type="button" aria-label="关闭">×</button><div class="rin" id="din"></div></section>
+<div class="confirm" id="confirm" role="dialog" aria-modal="true"><div class="box"><b id="cfT">确认已支付 ¥1.9？</b><p id="cfP">支付成功后才能查看完整报告</p><button class="yes" id="yes" type="button">确认已支付</button><button class="no" id="no" type="button">还没付，返回</button></div></div>
+<script src="qrcode.js"></script>
+<script src="reports.js"></script>
+<script src="pair.js"></script>
+<script>
+{
+const B=[
+ {id:'moon',col:'236,230,214',name:'潮汐锁定',type:'回避型依恋',x:0,y:0,r:165,img:'assets/moon.webp',w:330,cr:'影像：NASA/GSFC/LRO',line:'永远只给人看同一面。',body:'你习惯给人看稳定、得体、“我没事”的那一面。不是不信任，是很早就学会了靠自己。你的另一面并不黑暗，只是还没有人绕到那边去。'},
+ {id:'lag',col:'255,214,150',name:'拉格朗日点',type:'安全型依恋',x:1010,y:-200,r:110,img:'assets/webb.webp',w:250,line:'两股引力之间，刚好能停住的地方。',body:'韦伯望远镜就停在这样一个点上：太阳和地球的引力在这里刚好平衡。你也能在亲密和独立之间找到这个位置，不必拼命靠近，也不用刻意逃开。',cr:'影像：NASA-GSFC, Adriana M. Gutierrez (CI Lab)'},
+ {id:'rogue',col:'120,200,255',name:'流浪行星',type:'回避型依恋',x:-1240,y:-320,r:104,img:'assets/rogue2.webp',w:220,cr:'影像：ESO/L. Calçada/P. Delorme/R. Saito/VVV Consortium',line:'不绕任何恒星转，也不觉得冷。',body:'你一个人也能过得很好，好到别人以为你不需要任何人。可流浪久了，偶尔也会想起被照亮是什么感觉。'},
+ {id:'binary',col:'170,215,255',name:'双星系统',type:'焦虑型依恋',x:-1010,y:-1610,r:170,img:'assets/binary2.webp',w:430,cr:'影像：ESO/L. Calçada',line:'互相绕着转，少了谁都会失衡。',body:'你把很多重心放在对方身上。在一起时彼此照亮，稍微分开一点，就开始心慌。'},
+ {id:'saturn',col:'240,214,170',name:'洛希极限',type:'恐惧型依恋',x:1120,y:-1420,r:120,img:'assets/saturn2.webp',w:340,cr:'影像：NASA, ESA, A. Simon (GSFC), M.H. Wong (UC Berkeley) and the OPAL Team',line:'太近会碎，太远会冷。',body:'土星环里的冰，就是离得太近、再也聚不成一颗月亮的碎片。你渴望靠近，又怕靠得太近，会被撕碎。'},
+ {id:'pulsar',col:'140,210,255',name:'脉冲星',type:'恐惧型依恋',x:-940,y:1240,r:90,img:'assets/pulsar2.webp',w:430,cr:'影像：ESO/L. Calçada',line:'一直在发光，只是很少有人恰好被照到。',body:'你会突然很热烈，又突然安静下来。别人说你忽冷忽热，其实你只是在转，转到朝向对方的那一刻，才敢让光落过去。'},
+ {id:'earth',col:'150,190,255',name:'稳定轨道',type:'安全型依恋',x:1090,y:1390,r:100,img:'assets/earth.webp',w:210,cr:'影像：NASA/NOAA DSCOVR',line:'不坠落，也不飞走。',body:'这是 DSCOVR 卫星在一百五十万公里外拍下的：月亮从地球前经过。你们之间的距离刚刚好，靠得近，也给得起自由。'},
+ {id:'comet',col:'225,225,220',name:'彗星',type:'焦虑型依恋',x:110,y:2060,r:120,img:'assets/comet2.webp',w:300,line:'靠近恒星时，才会发光。',body:'这是罗塞塔号拍下的 67P 彗星，越靠近太阳，喷出的光就越亮。你也是这样：离对方越近越明亮，一旦远了，就开始拖出长长的思念。',cr:'影像：ESA/Rosetta/NAVCAM, CC BY-SA IGO 3.0'}
+];
+const LINKS=[['binary','rogue'],['rogue','moon'],['moon','lag'],['lag','saturn'],['saturn','binary'],['moon','pulsar'],['pulsar','comet'],['comet','earth'],['earth','lag']];
+const byId=Object.fromEntries(B.map(b=>[b.id,b]));
+const sheet=document.getElementById('sheet'),sName=document.getElementById('sName'),sType=document.getElementById('sType'),sLine=document.getElementById('sLine'),sBody=document.getElementById('sBody'),sScore=document.getElementById('sScore'),sCr=document.getElementById('sCr'),sFoot=document.getElementById('sFoot');let you=null;
+const cv=document.getElementById('sky'),g=cv.getContext('2d'),tags=document.getElementById('tags');
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let W=0,H=0,dpr=1;
+const cam={x:0,y:0,s:1};let anim=null,vel={x:0,y:0},focus='moon',overview=false;
+const bounds={x0:-1500,x1:1500,y0:-1900,y1:2450};
+const minS=()=>Math.min(W/(bounds.x1-bounds.x0+500),H/(bounds.y1-bounds.y0+500));
+function size(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr}
+addEventListener('resize',size);size();
+const milky=new Image();milky.src='assets/milky.webp';
+for(const b of B){if(b.img){b.im=new Image();b.im.src=b.img;b.im.onload=()=>{b.ready=performance.now()}}
+ const el=document.createElement('div');el.className='tag';el.innerHTML=`<b>${b.name}</b><i>${b.line}</i>`;tags.appendChild(el);b.tag=el}
+let sd=11;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;
+const T=1400,layers=[{f:.18,n:150,a:[.08,.32],r:[.3,.6]},{f:.4,n:46,a:[.18,.55],r:[.4,.8]},{f:.75,n:9,a:[.5,.95],r:[.7,1.2]}];
+for(const L of layers)L.st=Array.from({length:L.n},()=>({x:rnd()*T,y:rnd()*T,a:L.a[0]+rnd()*(L.a[1]-L.a[0]),r:L.r[0]+rnd()*(L.r[1]-L.r[0]),p:rnd()*6.28,w:.4+rnd()*1.2,c:rnd()<.2?'205,218,255':(rnd()<.15?'255,228,200':'244,240,232')}));
+const haze=document.createElement('canvas');haze.width=256;haze.height=360;{const h=haze.getContext('2d');for(let i=0;i<26;i++){const t=rnd(),x=40+t*180+(rnd()-.5)*60,y=330-t*300+(rnd()-.5)*40,r=20+rnd()*55,gr=h.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(${rnd()<.5?'210,196,176':'170,186,214'},.05)`);gr.addColorStop(1,'rgba(0,0,0,0)');h.fillStyle=gr;h.fillRect(0,0,256,360)}}
+const S=(x,y)=>[(x-cam.x)*cam.s+W/2,(y-cam.y)*cam.s+H/2];
+function stars(t){for(const L of layers){const ox=((-cam.x*cam.s*L.f)%T+T)%T,oy=((-cam.y*cam.s*L.f)%T+T)%T;for(const s of L.st){let x=(s.x+ox)%T,y=(s.y+oy)%T;const tw=reduce?1:.65+.35*Math.sin(t*.001*s.w+s.p);for(let X=x;X<W;X+=T)for(let Y=y;Y<H;Y+=T){g.fillStyle=`rgba(${s.c},${s.a*tw})`;g.beginPath();g.arc(X,Y,s.r,0,6.283);g.fill()}}}}
+function glow(x,y,r,c,a){const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(${c},${a})`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.fillRect(x-r,y-r,2*r,2*r)}
+function beam(x,y,ang,len,wid,c,a){g.save();g.translate(x,y);g.rotate(ang);const gr=g.createLinearGradient(0,0,len,0);gr.addColorStop(0,`rgba(${c},${a})`);gr.addColorStop(.35,`rgba(${c},${a*.45})`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.beginPath();g.moveTo(0,-wid/2);g.lineTo(len,-wid*.08);g.lineTo(len,wid*.08);g.lineTo(0,wid/2);g.closePath();g.fill();g.restore()}
+function fan(x,y,ang,len,spread,n,c,a,w){for(let i=-n;i<=n;i++){const k=1-Math.abs(i)/(n+1);beam(x,y,ang+spread*i/n,len*(.55+.45*k),w,c,a*k*k)}}
+function body(b,t){const [x,y]=S(b.x,b.y),s=cam.s,R=b.r*s;if(x<-900*s-50||x>W+900*s+50||y<-900*s-50||y>H+900*s+50)return;
+ const lod=Math.max(0,Math.min(1,(s-.17)/.26));if(lod<1){const pa=1-lod,tw=reduce?1:.85+.15*Math.sin(t*.0015+b.x);glow(x,y,26,b.col,.22*pa*tw);glow(x,y,9,b.col,.55*pa*tw);g.fillStyle=`rgba(255,253,248,${.95*pa})`;g.beginPath();g.arc(x,y,1.7,0,6.283);g.fill();if(b.id==='binary'||b.id==='pulsar'||b.id==='lag'){g.save();g.translate(x,y);g.globalAlpha=pa*.7;for(let i=0;i<4;i++){g.rotate(Math.PI/2);const gr=g.createLinearGradient(0,0,16,0);gr.addColorStop(0,`rgba(${b.col},.8)`);gr.addColorStop(1,`rgba(${b.col},0)`);g.fillStyle=gr;g.fillRect(0,-.5,16,1)}g.restore();g.globalAlpha=1}}
+ if(lod<=0)return;
+ if(b.im){if(!b.ready)return;const k=Math.min(1,(t-b.ready)/1400)*lod,w=b.w*s,h=w*b.im.naturalHeight/b.im.naturalWidth;g.globalAlpha=k;if(b.id==='moon')glow(x,y,R*1.25,'225,220,205',.05);if(b.id==='earth')glow(x,y,R*1.5,'120,170,255',.07);if(b.id==='rogue')glow(x,y,R*1.7,'90,170,255',.12);if(b.id==='pulsar')glow(x,y,R*2.2,'120,190,255',.10);g.drawImage(b.im,x-w/2,y-h/2,w,h);g.globalAlpha=1;return}
+ if(b.draw==='rogue'){glow(x,y,R*1.6,'140,165,210',.05);g.save();g.beginPath();g.arc(x,y,R,0,6.283);g.fillStyle='#030406';g.fill();g.clip();const gr=g.createRadialGradient(x-R*.3,y+R*.25,R*.2,x-R*.3,y+R*.25,R*1.32);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(.8,'rgba(0,0,0,0)');gr.addColorStop(.97,'rgba(165,188,228,.55)');gr.addColorStop(1,'rgba(200,215,240,.75)');g.fillStyle=gr;g.fillRect(x-R,y-R,2*R,2*R);g.restore();return}
+ if(b.draw==='pulsar'){const a=reduce?-1.1:t*.00035,L=900*s,c='170,205,255';for(const d of [0,Math.PI]){fan(x,y,a+d,L,.018,9,c,.13,2.4*s);beam(x,y,a+d,L*.85,1.6*s,'225,236,255',.55)}glow(x,y,80*s,c,.28);glow(x,y,16*s,'255,255,255',1);return}
+ if(b.draw==='comet'){const a=-2.25,L=640*s;fan(x,y,a,L,.075,22,'150,185,255',.2,2.6*s);fan(x,y,a-.1,L*.7,.06,14,'235,222,200',.14,2.4*s);beam(x,y,a,L*.9,1.4*s,'235,242,255',.6);glow(x,y,40*s,'190,215,255',.22);glow(x,y,10*s,'255,255,255',1);return}
+ if(b.draw==='lag'){const L=58*s;g.save();g.translate(x,y);for(let i=0;i<6;i++){g.rotate(Math.PI/3);const gr=g.createLinearGradient(0,0,L,0);gr.addColorStop(0,'rgba(255,240,215,.9)');gr.addColorStop(1,'rgba(255,240,215,0)');g.fillStyle=gr;g.fillRect(0,-.6*Math.max(s,.5),L,1.2*Math.max(s,.5))}g.restore();glow(x,y,26*s,'255,232,200',.45);glow(x,y,6*s,'255,255,255',1)}}
+function frame(t){
+ if(anim){const k=Math.min(1,(t-anim.t0)/anim.d),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;cam.x=anim.a.x+(anim.b.x-anim.a.x)*e;cam.y=anim.a.y+(anim.b.y-anim.a.y)*e;cam.s=Math.exp(Math.log(anim.a.s)+(Math.log(anim.b.s)-Math.log(anim.a.s))*e);if(k>=1)anim=null}
+ else if(!drag&&(Math.abs(vel.x)+Math.abs(vel.y)>.02)){cam.x-=vel.x/cam.s;cam.y-=vel.y/cam.s;vel.x*=.93;vel.y*=.93}
+ g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#000';g.fillRect(0,0,W,H);
+ {const [hx,hy]=S(bounds.x0,bounds.y0),hw=(bounds.x1-bounds.x0)*cam.s,hh=(bounds.y1-bounds.y0)*cam.s;g.globalAlpha=.35;g.drawImage(haze,hx,hy,hw,hh);g.globalAlpha=1}
+ if(milky.complete&&milky.naturalWidth){const [mx,my]=S(0,250),mw=7400*cam.s,mh=mw*milky.naturalHeight/milky.naturalWidth;g.save();g.translate(mx,my);g.rotate(-1.02);g.globalAlpha=.85-Math.max(0,Math.min(1,(cam.s-.15)/.4))*.79;g.drawImage(milky,-mw/2,-mh/2,mw,mh);g.restore();g.globalAlpha=1}
+ stars(t);
+ const la=Math.max(0,Math.min(1,(.55-cam.s)/.35))*.32;if(la>0){g.strokeStyle=`rgba(236,226,200,${la*.7})`;g.lineWidth=.6;g.setLineDash([]);for(const [p,q] of LINKS){const A=byId[p],C=byId[q],[x1,y1]=S(A.x,A.y),[x2,y2]=S(C.x,C.y),d=Math.hypot(x2-x1,y2-y1),u=(x2-x1)/d,v=(y2-y1)/d,o1=A.r*cam.s+8,o2=C.r*cam.s+8;if(d>o1+o2){g.beginPath();g.moveTo(x1+u*o1,y1+v*o1);g.lineTo(x2-u*o2,y2-v*o2);g.stroke()}}g.setLineDash([])}
+ for(const b of B)body(b,t);
+ const near=cam.s>.5,ia=near?1:0;
+ for(const b of B){const [x,y]=S(b.x,b.y),R=b.r*cam.s,on=x>-60&&x<W+60&&y>-60&&y<H+60;const el=b.tag;
+  if(on){const lx=b.id==='comet'?x+R+18:x-40,ly=y+Math.max(R,24*cam.s)+(near?26:12);el.style.transform=`translate(${Math.round(lx)}px,${Math.round(ly)}px)${near?'':' scale(.7)'}`;el.style.opacity=cam.s<.08?0:1;el.lastChild.style.opacity=ia}
+  else{el.style.opacity=0;if(cam.s>.3){const cx=W/2,cy=H/2,dx=x-cx,dy=y-cy,m=Math.max(Math.abs(dx)/(W/2-16),Math.abs(dy)/(H/2-16)),ex=cx+dx/m,ey=cy+dy/m;glow(ex,ey,7,'236,232,222',.18);g.fillStyle='rgba(236,232,222,.45)';g.beginPath();g.arc(ex,ey,1.3,0,6.283);g.fill()}}}
+ if(sheet.classList.contains('open'))for(const b of B)b.tag.style.opacity=0;
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+function fly(to,d){vel={x:0,y:0};if(reduce){Object.assign(cam,to);return}anim={a:{...cam},b:to,t0:performance.now(),d:d||1600}}
+function open(b,res){focus=b.id;cur=b;if(res)curRes=res;sName.textContent=b.name;sType.textContent=b.type;sLine.textContent=b.line;sBody.textContent=b.body;sCr.textContent=b.cr||'';sScore.textContent=res?`牵挂 ${res.a} · 距离感 ${res.v}`:'';sFoot.textContent=res?'这是你的天体 · 拖动，去看看别人的引力':(you&&b.id!==you?'这不是你的星，但也许是某个人的':'轻触空白处，继续漫游');sheet.classList.add('open');document.body.classList.add('reading');overview=false;view.textContent='全景';fly({x:b.x,y:b.y+(H*.18),s:1},res?2600:1600)}
+function close(){sheet.classList.remove('open');document.body.classList.remove('reading')}
+document.getElementById('close').onclick=close;
+const view=document.getElementById('view');
+view.onclick=()=>{close();if(!overview){overview=true;view.textContent='回到'+byId[focus].name;fly({x:(bounds.x0+bounds.x1)/2,y:(bounds.y0+bounds.y1)/2,s:minS()},2200)}else{overview=false;view.textContent='全景';const b=byId[focus];fly({x:b.x,y:b.y,s:1},2200)}};
+const hint=document.getElementById('hint');let moved=0;
+const P=new Map();let drag=false,start=null,last=null,pinch=null;
+function zoomAt(px,py,f){const ns=Math.max(minS()*.85,Math.min(1.6,cam.s*f));const wx=(px-W/2)/cam.s+cam.x,wy=(py-H/2)/cam.s+cam.y;cam.s=ns;cam.x=wx-(px-W/2)/ns;cam.y=wy-(py-H/2)/ns}
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});anim=null;vel={x:0,y:0};if(P.size===1){drag=true;cv.classList.add('drag');start=last={x:e.clientX,y:e.clientY,t:performance.now()}}else if(P.size===2){const [a,b]=[...P.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)}}});
+cv.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});if(P.size===2&&pinch){const [a,b]=[...P.values()],d=Math.hypot(a.x-b.x,a.y-b.y);zoomAt((a.x+b.x)/2,(a.y+b.y)/2,d/pinch.d);pinch.d=d;return}if(drag&&last){const dx=e.clientX-last.x,dy=e.clientY-last.y;cam.x-=dx/cam.s;cam.y-=dy/cam.s;vel={x:dx,y:dy};last={x:e.clientX,y:e.clientY,t:performance.now()};moved+=Math.abs(dx)+Math.abs(dy);if(moved>40)hint.classList.add('gone')}});
+function up(e){const wasTap=start&&Math.hypot(e.clientX-start.x,e.clientY-start.y)<8&&P.size===1;P.delete(e.pointerId);if(P.size<2)pinch=null;if(P.size===0){drag=false;cv.classList.remove('drag');if(last&&performance.now()-last.t>80)vel={x:0,y:0}}
+ if(wasTap){let hit=null,best=1e9;for(const b of B){const [x,y]=S(b.x,b.y),d=Math.hypot(e.clientX-x,e.clientY-y),rr=Math.max(b.r*cam.s,22)+12;if(d<rr&&d<best){best=d;hit=b}}if(hit)open(hit);else close()}}
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+
+const QS=[
+ {t:'对方很久没回消息，我会忍不住一遍遍点开对话框。',k:'a'},
+ {t:'别人靠得太近时，我会下意识想往后退一点。',k:'v'},
+ {t:'我常担心，对方喜欢我，没有我喜欢他那么多。',k:'a'},
+ {t:'心里真正的想法，我不太习惯讲给对方听。',k:'v'},
+ {t:'就算对方一整天没联系我，我也能安心做自己的事。',k:'a',r:1},
+ {t:'比起依赖别人，我更相信靠自己。',k:'v'},
+ {t:'关系里一点点冷淡，就能让我难受很久。',k:'a'},
+ {t:'难过的时候，我很自然地会想找亲近的人说说。',k:'v',r:1},
+ {t:'我需要对方反复确认，才敢相信他是真的在乎我。',k:'a'},
+ {t:'对方太黏的时候，我会觉得有点透不过气。',k:'v'},
+ {t:'我害怕自己不够好，迟早会被离开。',k:'a'},
+ {t:'我很难开口向对方要求什么。',k:'v'},
+ {t:'对方和别人聊得很开心时，我心里会有点不是滋味。',k:'a'},
+ {t:'关系越认真，我越想给自己留一点退路。',k:'v'},
+ {t:'我很少担心自己会被抛下。',k:'a',r:1},
+ {t:'需要帮助的时候，我会直接去找对方。',k:'v',r:1},
+ {t:'吵架后如果对方没先来找我，我会越想越慌。',k:'a'},
+ {t:'我会刻意不让自己太在乎一个人。',k:'v'},
+ {t:'我有时会悄悄试探，看看对方有多在意我。',k:'a'},
+ {t:'一个人待着的时候，我反而最自在。',k:'v'}
+];
+const CON=[[-.9,-.2],[-.7,-.55],[-.45,-.32],[-.52,.05],[-.25,.25],[-.05,-.08],[.12,-.5],[.32,-.78],[.52,-.45],[.36,-.14],[.6,.06],[.86,-.22],[.95,.3],[.66,.46],[.4,.72],[.14,.5],[-.1,.82],[-.4,.6],[-.7,.76],[-.95,.44]];
+const cover=document.getElementById('cover'),quiz=document.getElementById('quiz'),qc=document.getElementById('qc'),qg=qc.getContext('2d'),qt=document.getElementById('qt'),scaleEl=document.getElementById('scale'),ends=document.getElementById('ends');
+const ans=[];let qi=0,qOn=false,lineK=0,lit=[];
+const bgS=Array.from({length:240},()=>({x:rnd(),y:rnd(),a:.05+rnd()*.24,r:.25+rnd()*.45,p:rnd()*6.28}));
+scaleEl.innerHTML=[1,2,3,4,5].map(v=>`<button type="button" data-v="${v}" aria-label="${['完全不像我','不太像我','说不准','有点像我','很像我'][v-1]}"><span style="width:${4+v*2.6}px;height:${4+v*2.6}px;opacity:${.25+v*.15};box-shadow:0 0 ${v*4}px ${v*.8}px rgba(244,236,216,${.08*v})"></span></button>`).join('');
+function qpos(i){const cx=W/2,cy=H*.33,sx=Math.min(W*.4,260),sy=Math.min(H*.2,190);return[cx+CON[i][0]*sx,cy+CON[i][1]*sy]}
+function qframe(t){if(!qOn)return;qc.width=W*dpr;qc.height=H*dpr;qg.setTransform(dpr,0,0,dpr,0,0);qg.fillStyle='#000';qg.fillRect(0,0,W,H);
+ if(milky.complete&&milky.naturalWidth){const mw=Math.max(W,H)*1.9,mh=mw*milky.naturalHeight/milky.naturalWidth;qg.save();qg.translate(W*.5,H*.5);qg.rotate(-1.05+t*.0000015);qg.globalAlpha=.34;qg.drawImage(milky,-mw/2,-mh/2,mw,mh);qg.restore();qg.globalAlpha=1}
+ {const[cx,cy]=[W/2,H*.33],vg=qg.createRadialGradient(cx,cy,0,cx,cy,Math.min(W*.6,380));vg.addColorStop(0,'rgba(0,0,0,.6)');vg.addColorStop(1,'rgba(0,0,0,0)');qg.fillStyle=vg;qg.fillRect(0,0,W,H)}
+ for(const s of bgS){const tw=reduce?1:.6+.4*Math.sin(t*.0012+s.p);qg.fillStyle=`rgba(244,240,232,${s.a*tw})`;qg.beginPath();qg.arc(s.x*W,s.y*H,s.r,0,6.283);qg.fill()}
+ if(lineK>0){qg.strokeStyle='rgba(217,201,163,.45)';qg.lineWidth=.8;qg.beginPath();const n=Math.min(lit.length-1,lineK);for(let i=0;i<=Math.floor(n);i++){const[x,y]=qpos(i);i?qg.lineTo(x,y):qg.moveTo(x,y)}const f=n-Math.floor(n);if(f>0&&Math.floor(n)+1<lit.length){const[a,b]=qpos(Math.floor(n)),[c,d]=qpos(Math.floor(n)+1);qg.lineTo(a+(c-a)*f,b+(d-b)*f)}qg.stroke()}
+ lit.forEach((L,i)=>{const[x,y]=qpos(i),k=Math.max(0,Math.min(1,(t-L.t)/900)),e=1-Math.pow(1-k,3),tw=reduce?1:.82+.18*Math.sin(t*.002+i),v=L.v;const gr=qg.createRadialGradient(x,y,0,x,y,(5+v*2.6)*e);gr.addColorStop(0,`rgba(250,240,214,${(.2+v*.07)*tw})`);gr.addColorStop(1,'rgba(244,236,216,0)');qg.fillStyle=gr;qg.fillRect(x-40,y-40,80,80);qg.fillStyle=`rgba(255,253,246,${Math.min(1,.7+v*.07)*e*tw})`;qg.beginPath();qg.arc(x,y,(.9+v*.38)*e,0,6.283);qg.fill()});
+ requestAnimationFrame(qframe)}
+function ask(){const tx=QS[qi].t;qt.classList.add('fade');setTimeout(()=>{if(qi<QS.length)qt.textContent=tx;qt.classList.remove('fade')},reduce?0:450)}
+scaleEl.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn||qi>=QS.length||scaleEl.dataset.busy)return;const v=+btn.dataset.v;ans[qi]=v;lit.push({v,t:performance.now()});qi++;if(qi<QS.length)ask();else finish()});
+function score(){let a=[],v=[];QS.forEach((q,i)=>{const x=q.r?6-ans[i]:ans[i];(q.k==='a'?a:v).push(x)});const m=l=>Math.round((l.reduce((p,c)=>p+c,0)/l.length-1)/4*100);return{a:m(a),v:m(v)}}
+function pick(r){const{a,v}=r;if(a<50&&v<50)return Math.max(a,v)<30?'earth':'lag';if(a>=50&&v<50)return a>=72?'binary':'comet';if(a<50)return v>=72?'rogue':'moon';return(a+v)/2>=72?'saturn':'pulsar'}
+function finish(){scaleEl.style.opacity=0;ends.style.opacity=0;scaleEl.dataset.busy=1;qt.classList.add('fade');setTimeout(()=>{qt.textContent='你的星座，已经点亮。';qt.classList.remove('fade')},500);
+ const t0=performance.now();(function grow(t){lineK=reduce?20:Math.min(19,(t-t0)/110);if(lineK<19)requestAnimationFrame(grow)})(t0);
+ const r=score(),id=pick(r),b=byId[id];you=id;b.tag.innerHTML=`<b>${b.name}<em>你</em></b><i>${b.line}</i>`;
+ setTimeout(()=>{cam.x=(bounds.x0+bounds.x1)/2;cam.y=(bounds.y0+bounds.y1)/2;cam.s=minS();anim=null;quiz.classList.add('hide');document.body.classList.remove('pre');hint.classList.add('gone');setTimeout(()=>{qOn=false;open(b,r)},1700)},3300)}
+document.getElementById('go').onclick=()=>{cover.classList.add('hide');quiz.classList.remove('hide');qOn=true;requestAnimationFrame(qframe);qt.textContent=QS[0].t};
+document.getElementById('skip').onclick=()=>{cover.classList.add('hide');document.body.classList.remove('pre')};
+
+{const cc=document.getElementById('cc'),cg=cc.getContext('2d');let sd2=29;const r2=()=>(sd2=(sd2*16807)%2147483647)/2147483647;
+const CS=[];for(let i=0;i<420;i++){const t=r2();const big=t>.985,mid=t>.88;CS.push({x:r2(),y:r2(),r:big?1.3+r2()*1.1:mid?.7+r2()*.5:.25+r2()*.45,a:big?.85:mid?.45+r2()*.35:.12+r2()*.35,p:r2()*6.28,w:.3+r2()*1.4,c:r2()<.18?'200,215,255':(r2()<.12?'255,226,196':'246,242,234'),big})}
+let drift=0;
+function cframe(t){if(cover.classList.contains('hide'))return;const w=innerWidth,h=innerHeight;if(cc.width!==w*dpr){cc.width=w*dpr;cc.height=h*dpr}cg.setTransform(dpr,0,0,dpr,0,0);cg.fillStyle='#000';cg.fillRect(0,0,w,h);
+ if(milky.complete&&milky.naturalWidth){const mw=Math.max(w,h)*1.9,mh=mw*milky.naturalHeight/milky.naturalWidth;cg.save();cg.translate(w*.5,h*.42);cg.rotate(-1.05);cg.globalAlpha=.55;cg.drawImage(milky,-mw/2,-mh/2,mw,mh);cg.restore();cg.globalAlpha=1}
+ drift=reduce?0:t*.000004;
+ for(const s of CS){const x=((s.x+drift*(s.big?1.6:1))%1)*w,y=s.y*h,tw=reduce?1:.55+.45*Math.sin(t*.001*s.w+s.p),a=s.a*tw;
+  if(s.big){const gr=cg.createRadialGradient(x,y,0,x,y,s.r*7);gr.addColorStop(0,`rgba(${s.c},${a*.35})`);gr.addColorStop(1,`rgba(${s.c},0)`);cg.fillStyle=gr;cg.fillRect(x-s.r*7,y-s.r*7,s.r*14,s.r*14);cg.fillStyle=`rgba(${s.c},${a*.5})`;cg.fillRect(x-s.r*5,y-.35,s.r*10,.7);cg.fillRect(x-.35,y-s.r*5,.7,s.r*10)}
+  cg.fillStyle=`rgba(${s.c},${a})`;cg.beginPath();cg.arc(x,y,s.r,0,6.283);cg.fill()}
+ const vg=cg.createRadialGradient(w/2,h*.45,0,w/2,h*.45,Math.max(w,h)*.38);vg.addColorStop(0,'rgba(0,0,0,.55)');vg.addColorStop(1,'rgba(0,0,0,0)');cg.fillStyle=vg;cg.fillRect(0,0,w,h);
+ requestAnimationFrame(cframe)}
+requestAnimationFrame(cframe)}
+
+const repEl=document.getElementById('rep'),rin=document.getElementById('rin');let cur=null,curRes=null;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function pairHTML(kind,p){const o=byId[p[0]];return `<button class="pair" type="button" data-go="${o.id}"><img src="${o.img}" alt=""><div><div class="pk">${kind}</div><div class="pn">${esc(o.name)}</div><div class="pd">${esc(p[1])}</div></div></button>`}
+function paidHTML(b,R){return `<div class="sec"><h3>吵架的时候</h3><p>${esc(FIGHT[b.id])}</p></div>
+ <div class="sec"><h3>你和其他天体</h3>${pairHTML('最合拍',R.good)}${pairHTML('最容易拉扯',R.hard)}</div>
+ <div class="sec"><h3>让轨道慢慢变稳</h3><p class="grow">${esc(R.grow)}</p></div>`}
+function lockHTML(){const f=t=>`<div class="lk"><h3>${t}</h3><div class="blur"><i></i><i></i><i style="width:62%"></i></div></div>`;
+ return `<div class="lock">${f('吵架的时候')}${f('你和其他天体 · 最合拍与最容易拉扯')}${f('让轨道慢慢变稳')}<button class="unl" id="unl" type="button">解锁剩下三部分 · ¥1.9</button><p class="lt">前面的内容都免费看，喜欢再解锁</p></div>`}
+function openRep(b){const R=REP[b.id];if(!R)return;const sc=curRes&&b.id===you?`<div class="rs">牵挂（依恋焦虑）${curRes.a} · 距离感（依恋回避）${curRes.v}</div>`:'';
+ rin.innerHTML=`<img class="hero" src="${b.img}" alt="${esc(b.name)}"><h2>${esc(b.name)}</h2><div class="rt">${esc(b.type)}</div>${sc}<p class="rl">${esc(b.line)}</p>
+ <div class="sec"><h3>天体档案</h3><p>${esc(R.arch)}</p></div>
+ <div class="sec"><h3>你在关系里的样子</h3>${R.scenes.map(x=>`<p class="scene">${esc(x)}</p>`).join('')}</div>
+ <div class="sec"><h3>你需要的引力</h3><p>${esc(R.need)}</p></div>
+ ${moonHTML()}
+ <div class="sec duoin"><h3>双人合盘</h3><p>把你和 TA 放进同一片夜空，看看你们之间是哪一种引力。</p><button class="go2" id="toDuo" type="button" style="margin-top:20px">开始合盘</button></div>
+ ${paidHTML(b,R)}
+ <div class="rc">${esc(b.cr||'')}</div>`;
+ repEl.scrollTop=0;repEl.classList.add('open')}
+document.getElementById('more').onclick=()=>{if(cur)openRep(cur)};
+let okTap=0;rin.addEventListener('click',e=>{if(e.target.id==='unl')openPay(cur);if(e.target.id==='paidok'&&++okTap>=5){okTap=0;memPaid=false;try{localStorage.removeItem(PAID)}catch(x){}const y=repEl.scrollTop;openRep(cur);repEl.scrollTop=y}});
+document.getElementById('rclose').onclick=()=>repEl.classList.remove('open');
+rin.addEventListener('click',e=>{const p=e.target.closest('[data-go]');if(p&&e.target.closest('#pay'))return;if(!p)return;repEl.classList.remove('open');open(byId[p.dataset.go])});
+
+const DPAID='xingti_duo';let memDuo=false;const isDuo=()=>{try{return memDuo||localStorage.getItem(DPAID)==='1'}catch(e){return memDuo}};
+const WX_PAY='wxp://f2f0Nekq3buN1Po2DgbR1Y0oNYOHi6JWSJiyjif45zNL7Gk',ALI_URL='https://qr.alipay.com/fkx165413lhqxh7ayhpvred',PAID='xingti_paid';
+let memPaid=false;const isPaid=()=>{try{return memPaid||localStorage.getItem(PAID)==='1'}catch(e){return memPaid}};
+const payEl=document.getElementById('pay'),qrbox=document.getElementById('qrbox'),paidBtn=document.getElementById('paidBtn'),conf=document.getElementById('confirm');
+const qrImg=t=>{try{const q=qrcode(0,'M');q.addData(t);q.make();return q.createDataURL(6,8)}catch(e){return''}};
+let ready=false,timer=null;function arm(sec){if(ready||timer)return;let n=sec;const tick=()=>{if(n<=0){clearInterval(timer);timer=null;ready=true;paidBtn.disabled=false;paidBtn.classList.add('on');paidBtn.textContent='我已完成支付，查看报告';return}paidBtn.textContent=`支付完成后可点击（${n}s）`;n--};tick();timer=setInterval(tick,1000)}
+function tab(k){document.querySelectorAll('#ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+ if(k==='wx'){qrbox.innerHTML=`<img class="qr" src="${qrImg(WX_PAY)}" alt="微信收款码"><div class="tip">长按图片保存到相册，再打开微信「扫一扫」，从相册选这张图</div>`;arm(12)}
+ else{qrbox.innerHTML=`<a class="alink" href="${ALI_URL}" target="_blank" rel="noopener">打开支付宝付款</a><br><img class="qr" src="${qrImg(ALI_URL)}" alt="支付宝收款码"><div class="tip">在电脑上看的话，用手机支付宝扫上面的码</div>`;qrbox.querySelector('.alink').addEventListener('click',()=>arm(6))}}
+document.getElementById('ptabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)tab(b.dataset.k)});
+let pending=null,payKind='rep';const PK={rep:{t:'完整观测报告',p:'¥1.9',l:['吵架的时候：你在冲突里的样子，和一句能救场的话','你和其他天体：最合拍与最容易拉扯的是谁','让轨道慢慢变稳的方法','一次解锁，8 种天体的报告全部可看'],c:'支付成功后才能查看完整报告'},
+ duo:{t:'双人合盘',p:'¥3.9',l:['你们之间的引力：你们为什么会这样相处','三个你们一定经历过的瞬间','你们的牵挂和距离感，放在一起比一比','对彼此最管用的一句话','一起把轨道走稳的方法','解锁一次，和不同的人合盘都不用再付'],c:'支付成功后才能查看完整合盘'}};
+function openPay(b,k='rep'){pending=b;payKind=k;const o=PK[k];payEl.querySelector('h2').textContent=o.t;payEl.querySelector('.price').textContent=o.p;payEl.querySelector('.plist').innerHTML=o.l.map(x=>`<li>${x}</li>`).join('');payEl.querySelector('.psteps').textContent=`① 支付 ${o.p}　② 回到这个页面　③ 解锁${k==='duo'?'合盘':'报告'}`;document.getElementById('cfT').textContent=`确认已支付 ${o.p}？`;document.getElementById('cfP').textContent=o.c;tab('ali');payEl.scrollTop=0;payEl.classList.add('open')}
+document.getElementById('pclose').onclick=()=>payEl.classList.remove('open');
+paidBtn.onclick=()=>{if(ready)conf.classList.add('on')};
+document.getElementById('no').onclick=()=>conf.classList.remove('on');
+document.getElementById('yes').onclick=()=>{conf.classList.remove('on');if(payKind==='duo'){memDuo=true;try{localStorage.setItem(DPAID,'1')}catch(e){}payEl.classList.remove('open');duoResult(true);return}memPaid=true;try{localStorage.setItem(PAID,'1')}catch(e){}payEl.classList.remove('open');if(pending){openRep(pending);requestAnimationFrame(()=>{const h=[...rin.querySelectorAll('.sec h3')].find(x=>x.textContent==='吵架的时候');if(h)h.parentNode.scrollIntoView({block:'start'})})}};
+const moreBtn=document.getElementById('more');
+// birthday moon
+const PH=[['新月','你出生那晚，月亮几乎整个藏进了暗处。你习惯把光收着，不是没有，是在等一个对的人看见。'],['蛾眉月','那一晚只亮了细细一弯。你的温柔是一点一点给的，可给出去的每一分都是真的。'],['上弦月','那一晚的月亮亮着一半、暗着一半。你身上的两面差不多一样重，所以你比谁都懂，平衡有多难。'],['盈凸月','月亮快要圆了，只差一点点。你总觉得自己还不够好，其实早就已经很亮了。'],['满月','你出生在满月的夜里。你习惯把整个自己都给出去，所以也最怕被辜负。'],['亏凸月','满月刚刚过去，光还很足。你见过最亮的时刻，所以更懂得珍惜身边的光。'],['下弦月','亮着的那一半，正慢慢让给暗处。你懂得放手，也懂得在安静里照顾好自己。'],['残月','那是黎明前的最后一弯。你习惯在别人看不见的时候发光，比如凌晨，比如一个人的时候。']];
+const fullMoon=new Image();fullMoon.src='assets/fullmoon.webp';
+function phaseOf(d){const t=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),14,0);const jd=t/864e5+2440587.5;let f=((jd-2451550.1)/29.530588853)%1;if(f<0)f+=1;return f}
+function phaseIdx(f){return f<.03||f>.97?0:f<.22?1:f<.28?2:f<.47?3:f<.53?4:f<.72?5:f<.78?6:7}
+function drawMoon(c,f){const d=Math.min(devicePixelRatio||1,2),S=220;c.width=S*d;c.height=S*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);const R=S/2-6,cx=S/2,cy=S/2;
+ const go=()=>{x.clearRect(0,0,S,S);const gl=x.createRadialGradient(cx,cy,R*.9,cx,cy,R*1.12);gl.addColorStop(0,'rgba(200,212,238,.16)');gl.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gl;x.fillRect(0,0,S,S);
+  x.drawImage(fullMoon,cx-R,cy-R,2*R,2*R);const k=Math.cos(2*Math.PI*f);x.save();if(f>.5){x.translate(S,0);x.scale(-1,1)}
+  x.beginPath();x.arc(cx,cy,R+1,-Math.PI/2,Math.PI/2,true);x.ellipse(cx,cy,(R+1)*Math.abs(k),R+1,0,Math.PI/2,-Math.PI/2,k>0);x.closePath();
+  try{x.filter='blur(2px)'}catch(e){}x.fillStyle='rgba(4,7,14,.8)';x.fill();x.filter='none';x.restore();x.beginPath();x.arc(cx,cy,R-.5,0,6.283);x.strokeStyle='rgba(190,205,235,.16)';x.lineWidth=1;x.stroke()};
+ if(fullMoon.complete&&fullMoon.naturalWidth)go();else fullMoon.onload=go}
+function moonHTML(){return `<div class="sec bmoon"><h3>出生那晚的月亮</h3><p style="font-size:14px;color:rgba(236,232,222,.6)">输入你的生日，看看那一夜的月亮</p><div class="row" style="margin-top:18px"><input type="date" id="bday" min="1950-01-01" max="${new Date().toISOString().slice(0,10)}" aria-label="生日"><button class="go2" id="bgo" type="button">看看那一晚</button></div><div id="bout"></div></div>`}
+function showMoon(){const v=document.getElementById('bday').value;if(!v)return;myBd=v;try{localStorage.setItem('xingti_bday',v)}catch(e){}const [y,m,dd]=v.split('-').map(Number);const f=phaseOf(new Date(y,m-1,dd));const i=phaseIdx(f),il=Math.round((1-Math.cos(2*Math.PI*f))/2*100),age=(f*29.53).toFixed(1);
+ document.getElementById('bout').innerHTML=`<canvas id="bmc" role="img" aria-label="${y}年${m}月${dd}日的月相：${PH[i][0]}"></canvas><div class="bn">${PH[i][0]}</div><div class="bd">${y}.${m}.${dd} · 亮了 ${il}% · 月龄 ${age} 天</div><p class="bt">${PH[i][1]}</p><p class="bt">那一晚，月亮亮着 ${il}%，暗着的那 ${100-il}%，也许正等着某个人来照亮。</p><p class="bh">按出生当天晚上十点计算</p>`;drawMoon(document.getElementById('bmc'),f)}
+rin.addEventListener('click',e=>{if(e.target.id==='bgo')showMoon();if(e.target.id==='toDuo'){repEl.classList.remove('open');openDuo()}});
+let myBd='';try{myBd=localStorage.getItem('xingti_bday')||''}catch(e){}
+function moonFrac(v){const[y,m,d]=v.split('-').map(Number);return phaseOf(new Date(y,m-1,d))}
+const litPct=f=>Math.round((1-Math.cos(2*Math.PI*f))/2*100);
+// ---- duo ----
+const duoEl=document.getElementById('duo'),din=document.getElementById('din');
+let inviter=null;{const m=location.hash.match(/h=([a-z]+)\.(\d+)\.(\d+)(?:\.(\d{8}))?/);if(m&&byId[m[1]])inviter={id:m[1],a:+m[2],v:+m[3],bd:m[4]?`${m[4].slice(0,4)}-${m[4].slice(4,6)}-${m[4].slice(6)}`:'',est:false,inv:true}}
+if(inviter){const sb=document.querySelector('#cover .sub');if(sb)sb.textContent='有人想和你一起看看，你们之间是哪一种引力';document.getElementById('duoBtn').textContent='和邀请你的 TA 合盘'}
+const D={me:null,ta:null,pick:null};
+function slotHTML(w){const o=D[w];const lab=w==='me'?'你':'TA';if(!o)return `<button class="slot${D.pick===w?' on':''}" data-w="${w}" type="button"><div class="sim"><i></i></div><b>${lab}</b><span>选一个天体</span><small>${w==='me'?'还没做题的话':'觉得 TA 像哪颗'}</small></button>`;
+ const b=byId[o.id];return `<button class="slot${D.pick===w?' on':''}" data-w="${w}" type="button"><div class="sim"><img src="${b.img}" alt=""></div><b>${lab}</b><span>${b.name}</span><small>${o.est?'按天体估算 · 点击更换':(o.inv?'TA 做题的结果':'你做题的结果')}</small></button>`}
+function openDuo(){if(!D.me&&you&&curRes)D.me={id:you,a:curRes.a,v:curRes.v,est:false};if(!D.ta&&inviter)D.ta=inviter;D.pick=null;renderDuo();duoEl.scrollTop=0;duoEl.classList.add('open')}
+function renderDuo(){const tb=(D.ta&&D.ta.bd)||'';
+ din.innerHTML=`<h2 style="font-size:30px">双人合盘</h2><p class="dsub">把两个人，放进同一片夜空</p>
+ <div class="slots">${slotHTML('me')}<div class="amp">×</div>${slotHTML('ta')}</div>
+ ${D.pick?`<div class="picker">${ORD.map(id=>`<button type="button" data-p="${id}" class="${D[D.pick]&&D[D.pick].id===id?'on':''}"><img src="${byId[id].img}" alt="">${byId[id].name}</button>`).join('')}</div><p class="ptip">${D.pick==='me'?'不确定的话，回去做一遍题会更准':'不确定的话，把下面的邀请链接发给 TA，让 TA 做一遍会更准'}</p>`:''}
+ <div class="bdrow"><label>你的生日<input type="date" id="dbme" value="${myBd}" max="${new Date().toISOString().slice(0,10)}"></label><label>TA 的生日<input type="date" id="dbta" value="${tb}" max="${new Date().toISOString().slice(0,10)}"></label></div>
+ <p class="ptip">生日选填，填了会多一个“两个月亮”</p>
+ <button class="unl" id="dgo" type="button">看看我们的引力</button>
+ ${D.me&&!D.me.est?`<div class="inv"><button id="dshare" type="button">把邀请链接发给 TA，让 TA 也做一遍</button><p id="dsh"></p></div>`:''}
+ <div id="dout"></div>`}
+function bar(x,c){return `<div class="bar"><i class="${c}" style="width:${Math.max(3,x)}%"></i></div>`}
+function cmpText(m,t){const out=[],da=m.a-t.a,dv=m.v-t.v;
+ out.push(Math.abs(da)<12?'你们在乎回应的程度差不多，对彼此的“牵挂”是对等的。':(da>0?'你比 TA 更容易牵挂。消息晚回一会儿，你会比 TA 想得多一些。':'TA 比你更容易牵挂。你觉得没什么的小事，TA 可能会放在心上很久。'));
+ out.push(Math.abs(dv)<12?'你们需要的空间也差不多，不容易因为“黏不黏”吵架。':(dv>0?'你比 TA 更需要自己的空间。TA 靠近的时候，你可能会先想退一步。':'TA 比你更需要自己的空间。TA 安静下来的时候，不一定是不在乎你。'));
+ if((m.a>=55&&t.v>=55&&t.a<55)||(t.a>=55&&m.v>=55&&m.a<55))out.push('一个牵挂偏高、一个距离感偏高：这正是最容易出现“一个追、一个躲”的配置，要多留意。');
+ if(m.a<40&&m.v<40&&t.a<40&&t.v<40)out.push('两个人都在低位，这是很省心的组合。');
+ return out.map(x=>`<p style="margin-bottom:10px">${x}</p>`).join('')}
+function duoResult(scroll){const m=D.me,t=D.ta;if(!m||!t)return;const out=document.getElementById('dout');if(!out)return;
+ const pk=PT[pairKey(m.id,t.id)],ck=catKey(m.id,t.id),C=CP[ck],bm=byId[m.id],bt=byId[t.id];
+ const mb=document.getElementById('dbme').value,tb=document.getElementById('dbta').value;if(mb){myBd=mb;try{localStorage.setItem('xingti_bday',mb)}catch(e){}}t.bd=tb;
+ let moons='';if(mb&&tb){const fm=moonFrac(mb),ft=moonFrac(tb),lm=litPct(fm),lt=litPct(ft),PHn=f=>PH[phaseIdx(f)][0];
+  const ln=lt>=100-lm-8?`你出生那晚，月亮暗着 ${100-lm}%；TA 出生那晚，月亮亮着 ${lt}%。TA 的光，刚好够照亮你暗着的那一部分。`:(lm>=100-lt-8?`TA 出生那晚，月亮暗着 ${100-lt}%；你出生那晚，月亮亮着 ${lm}%。你的光，刚好够照亮 TA 暗着的那一部分。`:`你们出生那晚，月亮都留着一些暗处。也许这样刚好：谁都不用把自己全部交出去，也能慢慢被看见。`);
+  moons=`<div class="sec c"><h3>两个月亮</h3><div class="dmoons"><div><canvas id="dmm"></canvas>你<b>${PHn(fm)}</b>亮 ${lm}%</div><div><canvas id="dmt"></canvas>TA<b>${PHn(ft)}</b>亮 ${lt}%</div></div><p class="dline" style="text-align:center;margin-top:24px!important">${ln}</p></div>`}
+ const est=m.est||t.est;
+ const paid=isDuo()?`<div class="sec"><h3>你们之间的引力</h3><p>${C.dyn}</p><p class="pro">${PRO[ck]}</p></div>
+ <div class="sec"><h3>你们一定经历过的瞬间</h3>${C.sc.map(x=>`<p class="scene">${x}</p>`).join('')}</div>
+ <div class="sec"><h3>牵挂和距离感</h3><div class="leg"><span><i style="background:rgba(217,201,163,.95)"></i>你</span><span><i style="background:rgba(150,190,255,.95)"></i>TA</span></div>
+  <div class="cmpr"><div class="cl"><span>牵挂</span><em>依恋焦虑 · 有多在意回应、多容易不安</em></div>${bar(m.a,'m')}${bar(t.a,'t')}</div>
+  <div class="cmpr"><div class="cl"><span>距离感</span><em>依恋回避 · 有多需要自己的空间</em></div>${bar(m.v,'m')}${bar(t.v,'t')}</div>
+  ${cmpText(m,t)}${est?'<p class="ptip" style="text-align:left">有一方没有做题，这部分按天体的典型分数估算。两个人都做题会更准。</p>':''}</div>
+ <div class="sec"><h3>对彼此最管用的一句话</h3><div class="say"><div class="who">你可以对 TA 说</div><p class="q2">${SAY[CAT[t.id]][0]}</p><p class="why">${SAY[CAT[t.id]][1]}</p></div><div class="say"><div class="who">你最想听 TA 说</div><p class="q2">${SAY[CAT[m.id]][0]}</p><p class="why">${SAY[CAT[m.id]][1].replace(/TA/g,'你')}</p></div></div>
+ <div class="sec c"><h3>一起把轨道走稳</h3><p class="grow">${C.tip}</p></div><p class="paidok" id="duook">✓ 已解锁合盘</p>`
+ :`<div class="lock">${['你们之间的引力','你们一定经历过的瞬间','牵挂和距离感 · 两个人比一比','对彼此最管用的一句话','一起把轨道走稳'].map(x=>`<div class="lk"><h3>${x}</h3><div class="blur"><i></i><i style="width:70%"></i></div></div>`).join('')}<button class="unl" id="dunl" type="button">解锁完整合盘 · ¥3.9</button><p class="lt">两个天体和两个月亮免费看 · 解锁一次，和不同的人合盘都不用再付</p></div>`;
+ out.innerHTML=`<div class="duoband"><img src="${bm.img}" alt="${bm.name}"><div class="ln"></div><img src="${bt.img}" alt="${bt.name}"></div><div class="dnames"><span>你 · ${bm.name}</span><span>TA · ${bt.name}</span></div>
+ <div class="dtitle">${pk[0]}</div><p class="dline">${pk[1]}</p>${moons}${paid}`;
+ if(mb&&tb){drawMoon(document.getElementById('dmm'),moonFrac(mb));drawMoon(document.getElementById('dmt'),moonFrac(tb))}
+ if(scroll)requestAnimationFrame(()=>out.scrollIntoView({block:'start',behavior:'smooth'}))}
+din.addEventListener('click',e=>{const sl=e.target.closest('.slot');if(sl){D.pick=D.pick===sl.dataset.w?null:sl.dataset.w;const keep=[document.getElementById('dbme').value,document.getElementById('dbta').value];renderDuo();document.getElementById('dbme').value=keep[0];document.getElementById('dbta').value=keep[1];return}
+ const pb=e.target.closest('[data-p]');if(pb){const id=pb.dataset.p,w=D.pick,e2=EST[id];const keep=[document.getElementById('dbme').value,document.getElementById('dbta').value];D[w]={id,a:e2[0],v:e2[1],est:true};D.pick=null;renderDuo();document.getElementById('dbme').value=keep[0];document.getElementById('dbta').value=keep[1];return}
+ if(e.target.id==='dgo'){if(!D.me||!D.ta){D.pick=!D.me?'me':'ta';const keep=[document.getElementById('dbme').value,document.getElementById('dbta').value];renderDuo();document.getElementById('dbme').value=keep[0];document.getElementById('dbta').value=keep[1];return}duoResult(true);return}
+ if(e.target.id==='dunl'){openPay(cur,'duo');return}
+ if(e.target.id==='duook'&&++okTap>=5){okTap=0;memDuo=false;try{localStorage.removeItem(DPAID)}catch(x){}duoResult(false);return}
+ if(e.target.id==='dshare'){const bd=(document.getElementById('dbme').value||'').replace(/-/g,'');const url=location.href.split('#')[0]+`#h=${D.me.id}.${D.me.a}.${D.me.v}${bd?'.'+bd:''}`;const sh=document.getElementById('dsh');let ok=false;try{navigator.clipboard.writeText(url).then(()=>{sh.textContent='已复制，发给 TA 就好：'+url},()=>{sh.textContent='长按复制这个链接发给 TA：'+url})}catch(x){sh.textContent='长按复制这个链接发给 TA：'+url}}});
+document.getElementById('dclose').onclick=()=>duoEl.classList.remove('open');
+document.getElementById('duoBtn').onclick=()=>openDuo();
+cv.addEventListener('wheel',e=>{e.preventDefault();anim=null;zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*.0015));hint.classList.add('gone')},{passive:false});
+}
+</script>
+</body>
+</html>
