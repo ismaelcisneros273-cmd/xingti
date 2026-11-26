@@ -59,6 +59,14 @@ html,body{margin:0;height:100%;background:#000;color:var(--ink);overflow:hidden;
 #cover .sub{margin:22px 0 0;font-size:16px;font-weight:300;letter-spacing:.2em;color:rgba(236,232,222,.78)}
 #cover .meta{margin:10px 0 0;font-size:12px;font-weight:300;letter-spacing:.3em;color:var(--mute)}
 .go{margin-top:56px;min-height:50px;padding:0 40px;border:1px solid rgba(217,201,163,.6);border-radius:999px;background:none;color:var(--gold);font:400 15px 'Noto Serif SC',serif;letter-spacing:.45em;cursor:pointer}
+.go.again{margin-top:14px;min-height:44px;padding:0 26px;border-color:rgba(236,232,222,.22);color:rgba(236,232,222,.62);font-size:13px;letter-spacing:.3em}
+.notice[hidden]{display:none}.notice{margin:0 0 38px;min-height:40px;padding:0 20px;border:1px solid rgba(217,201,163,.45);border-radius:999px;background:rgba(217,201,163,.08);color:#efe4c6;font:400 13px 'Noto Serif SC',serif;letter-spacing:.15em;white-space:nowrap;cursor:pointer;z-index:3;animation:nb 2.4s ease-in-out infinite}
+@keyframes nb{50%{box-shadow:0 0 22px rgba(217,201,163,.25)}}
+.plist2{margin-top:26px;text-align:left}.plist2 h4{margin:0 0 10px;font-weight:400;font-size:11px;letter-spacing:.35em;color:var(--gold);text-align:center}
+.prow{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;justify-content:center;flex-wrap:wrap}
+.pchip{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border:1px solid rgba(236,232,222,.16);border-radius:999px;background:rgba(255,255,255,.03);color:inherit;font:inherit;font-size:12.5px;letter-spacing:.08em;cursor:pointer}
+.pchip.on{border-color:var(--gold)}.pchip img{width:30px;height:30px;object-fit:contain}.pchip small{color:rgba(236,232,222,.45);font-size:10.5px;margin-left:2px}
+.pchip i{font-style:normal;color:var(--gold);font-size:10px;margin-left:4px}
 .skip{margin-top:14px;min-height:44px;padding:0 16px;border:0;background:none;color:rgba(236,232,222,.45);font:300 12px 'Noto Serif SC',serif;letter-spacing:.3em;cursor:pointer}
 #qc{position:absolute;inset:0;width:100%;height:100%}
 .qbox{position:absolute;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));padding:0 26px;text-align:center}
@@ -203,7 +211,7 @@ html,body{margin:0;height:100%;background:#000;color:var(--ink);overflow:hidden;
 <button class="view" id="view" type="button">全景</button>
 <div class="hint" id="hint">拖动 · 去黑暗里找其他的星</div>
 <div class="credit">影像 NASA · ESO · ESA/Webb · ESA/Rosetta · 银河 ESO/S. Brunier</div>
-<section class="stage" id="cover"><canvas id="cc" aria-hidden="true"></canvas><div class="seed" aria-hidden="true"></div><h1>引力观测站</h1><p class="sub">你在亲密关系里，是哪一种引力</p><p class="meta">二十个瞬间 · 约三分钟</p><button class="go" id="go" type="button">开始观测</button><button class="skip" id="skip" type="button">先看看星空</button></section>
+<section class="stage" id="cover"><canvas id="cc" aria-hidden="true"></canvas><div class="seed" aria-hidden="true"></div><button class="notice" id="notice" type="button" hidden></button><h1>引力观测站</h1><p class="sub">你在亲密关系里，是哪一种引力</p><p class="meta">二十个瞬间 · 约三分钟</p><button class="go" id="back" type="button" hidden></button><button class="go" id="go" type="button">开始观测</button><button class="skip" id="skip" type="button">先看看星空</button></section>
 <section class="stage hide" id="quiz" aria-live="polite"><canvas id="qc" aria-hidden="true"></canvas><div class="qbox"><p class="q" id="qt"></p><div class="scale" id="scale"></div><div class="ends" id="ends"><span>不像我</span><span>很像我</span></div></div></section>
 <section class="sheet" id="sheet" aria-live="polite">
 <button class="x" id="close" type="button" aria-label="关闭">×</button>
@@ -322,6 +330,9 @@ const QS=[
 ];
 const CON=[[-.9,-.2],[-.7,-.55],[-.45,-.32],[-.52,.05],[-.25,.25],[-.05,-.08],[.12,-.5],[.32,-.78],[.52,-.45],[.36,-.14],[.6,.06],[.86,-.22],[.95,.3],[.66,.46],[.4,.72],[.14,.5],[-.1,.82],[-.4,.6],[-.7,.76],[-.95,.44]];
 const cover=document.getElementById('cover'),quiz=document.getElementById('quiz'),qc=document.getElementById('qc'),qg=qc.getContext('2d'),qt=document.getElementById('qt'),scaleEl=document.getElementById('scale'),ends=document.getElementById('ends');
+const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lss=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const code8=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',b=new Uint32Array(8);crypto.getRandomValues(b);return [...b].map(x=>A[x%A.length]).join('')};
+let me0=null;try{me0=JSON.parse(lsg('xingti_me')||'null');if(me0&&!byId[me0.id])me0=null}catch(e){me0=null}
 const ans=[];let qi=0,qOn=false,lineK=0,lit=[];
 const bgS=Array.from({length:240},()=>({x:rnd(),y:rnd(),a:.05+rnd()*.24,r:.25+rnd()*.45,p:rnd()*6.28}));
 scaleEl.innerHTML=[1,2,3,4,5].map(v=>`<button type="button" data-v="${v}" aria-label="${['完全不像我','不太像我','说不准','有点像我','很像我'][v-1]}"><span style="width:${4+v*2.6}px;height:${4+v*2.6}px;opacity:${.25+v*.15};box-shadow:0 0 ${v*4}px ${v*.8}px rgba(244,236,216,${.08*v})"></span></button>`).join('');
@@ -339,7 +350,7 @@ function score(){let a=[],v=[];QS.forEach((q,i)=>{const x=q.r?6-ans[i]:ans[i];(q
 function pick(r){const{a,v}=r;if(a<50&&v<50)return Math.max(a,v)<30?'earth':'lag';if(a>=50&&v<50)return a>=72?'binary':'comet';if(a<50)return v>=72?'rogue':'moon';return(a+v)/2>=72?'saturn':'pulsar'}
 function finish(){scaleEl.style.opacity=0;ends.style.opacity=0;scaleEl.dataset.busy=1;qt.classList.add('fade');setTimeout(()=>{qt.textContent='你的星座，已经点亮。';qt.classList.remove('fade')},500);
  const t0=performance.now();(function grow(t){lineK=reduce?20:Math.min(19,(t-t0)/110);if(lineK<19)requestAnimationFrame(grow)})(t0);
- const r=score(),id=pick(r),b=byId[id];you=id;b.tag.innerHTML=`<b>${b.name}<em>你</em></b><i>${b.line}</i>`;
+ const r=score(),id=pick(r),b=byId[id];you=id;lss('xingti_me',JSON.stringify({id,a:r.a,v:r.v}));me0={id,a:r.a,v:r.v};if(inviter)roomPost();b.tag.innerHTML=`<b>${b.name}<em>你</em></b><i>${b.line}</i>`;
  setTimeout(()=>{cam.x=(bounds.x0+bounds.x1)/2;cam.y=(bounds.y0+bounds.y1)/2;cam.s=minS();anim=null;quiz.classList.add('hide');document.body.classList.remove('pre');hint.classList.add('gone');setTimeout(()=>{qOn=false;open(b,r)},1700)},3300)}
 document.getElementById('go').onclick=()=>{cover.classList.add('hide');quiz.classList.remove('hide');qOn=true;requestAnimationFrame(qframe);qt.textContent=QS[0].t};
 document.getElementById('skip').onclick=()=>{cover.classList.add('hide');document.body.classList.remove('pre')};
@@ -381,7 +392,6 @@ document.getElementById('rclose').onclick=()=>repEl.classList.remove('open');
 rin.addEventListener('click',e=>{const p=e.target.closest('[data-go]');if(p&&e.target.closest('#pay'))return;if(!p)return;repEl.classList.remove('open');open(byId[p.dataset.go])});
 
 const AFD={p:'xt',plan:'61cef380e8c011f1b4d752540025c377',sku:'61d2b178e8c011f18a8552540025c377',api:'https://www.yunachen.cn/api/paid'};
-const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lss=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 let afdMem='';function afdId(){let id=lsg('afd_xt')||afdMem;if(!/^[A-HJ-NP-Z2-9]{8}$/.test(id||'')){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',b=new Uint32Array(8);crypto.getRandomValues(b);id=[...b].map(x=>A[x%A.length]).join('');lss('afd_xt',id)}return afdMem=id}
 function afdLink(){const id=afdId();return 'https://afdian.com/order/create?product_type=1&plan_id='+AFD.plan+'&sku='+encodeURIComponent(JSON.stringify([{sku_id:AFD.sku,count:1}]))+'&viokrz_ex=0&custom_order_id='+id+'&remark='+encodeURIComponent('解锁编号 '+id+'（付完回到合盘页会自动解锁）')}
 let afdT=null,afdUntil=0,afdBusy=false;
@@ -429,14 +439,31 @@ function moonFrac(v){const[y,m,d]=v.split('-').map(Number);return phaseOf(new Da
 const litPct=f=>Math.round((1-Math.cos(2*Math.PI*f))/2*100);
 // ---- duo ----
 const duoEl=document.getElementById('duo'),din=document.getElementById('din');
-let inviter=null;{const m=location.hash.match(/h=([a-z]+)\.(\d+)\.(\d+)(?:\.(\d{8}))?/);if(m&&byId[m[1]])inviter={id:m[1],a:+m[2],v:+m[3],bd:m[4]?`${m[4].slice(0,4)}-${m[4].slice(4,6)}-${m[4].slice(6)}`:'',est:false,inv:true}}
+let inviter=null;{const m=location.hash.match(/h=([a-z]+)\.(\d+)\.(\d+)(?:\.(\d{8}|x))?(?:\.([A-HJ-NP-Z2-9]{8}))?/);if(m&&byId[m[1]])inviter={id:m[1],a:+m[2],v:+m[3],bd:m[4]&&m[4]!=='x'?`${m[4].slice(0,4)}-${m[4].slice(4,6)}-${m[4].slice(6)}`:'',room:m[5]||'',est:false,inv:true}}
+const ROOMAPI='https://www.yunachen.cn/api/xtroom';
+let myTok=lsg('xingti_tok');if(!/^[A-HJ-NP-Z2-9]{8}$/.test(myTok||'')){myTok=code8();lss('xingti_tok',myTok)}
+let partners=[];try{partners=JSON.parse(lsg('xingti_partners')||'[]')}catch(e){}
+const savePartners=()=>lss('xingti_partners',JSON.stringify(partners.slice(0,30)));
+function addPartner(p){const i=partners.findIndex(x=>x.k===p.k);if(i>=0){partners[i]={...partners[i],...p};return false}partners.unshift(p);return true}
+function roomPost(bd){if(!inviter||!inviter.room||!me0||inviter.room===lsg('xingti_room'))return;const body={room:inviter.room,who:myTok,id:me0.id,a:me0.a,v:me0.v,bd:(bd||myBd||'').replace(/-/g,'')};try{fetch(ROOMAPI,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)}).catch(()=>{})}catch(e){}}
+if(inviter){addPartner({k:'inv:'+inviter.id+inviter.a+inviter.v,id:inviter.id,a:inviter.a,v:inviter.v,bd:inviter.bd,t:Date.now(),from:'邀请你的 TA'});savePartners()}
+async function roomPull(){const room=lsg('xingti_room');if(!room)return 0;try{const d=await fetch(ROOMAPI+'?room='+room,{cache:'no-store'}).then(r=>r.json());let n=0;for(const e of d.list||[]){if(!byId[e.id])continue;const bd=e.bd?`${e.bd.slice(0,4)}-${e.bd.slice(4,6)}-${e.bd.slice(6)}`:'';if(addPartner({k:'r:'+e.who,id:e.id,a:e.a,v:e.v,bd,t:e.t,from:'回应了你的邀请',fresh:true}))n++}savePartners();return n}catch(e){return 0}}
 if(inviter){const sb=document.querySelector('#cover .sub');if(sb)sb.textContent='有人想和你一起看看，你们之间是哪一种引力';document.getElementById('duoBtn').textContent='和邀请你的 TA 合盘'}
+// cover for returning visitors
+{const back=document.getElementById('back'),go=document.getElementById('go');
+ if(me0){back.hidden=false;back.textContent=inviter?'直接看我们的合盘':`回到我的天体 · ${byId[me0.id].name}`;go.textContent='重新观测一次';go.classList.add('again');
+  back.onclick=()=>{cover.classList.add('hide');document.body.classList.remove('pre');goMine(!!inviter)}}
+ roomPull().then(n=>{const fresh=partners.filter(p=>p.fresh).length;if(fresh&&me0){const nb=document.getElementById('notice');nb.hidden=false;nb.textContent=`✦ 有 ${fresh} 个人回应了你的邀请 · 去看合盘`;nb.onclick=()=>{cover.classList.add('hide');document.body.classList.remove('pre');const p=partners.find(x=>x.fresh);goMine(true,p)}}})}
+function goMine(duo,p){you=me0.id;curRes={a:me0.a,v:me0.v};const b=byId[you];b.tag.innerHTML=`<b>${b.name}<em>你</em></b><i>${b.line}</i>`;hint.classList.add('gone');
+ if(inviter&&duo)roomPost();
+ setTimeout(()=>{open(b,curRes);if(duo)setTimeout(()=>{if(p){D.ta={...p,est:false,inv:true}}openDuo();if(D.me&&D.ta)duoResult(false)},900)},300)}
 const D={me:null,ta:null,pick:null};
 function slotHTML(w){const o=D[w];const lab=w==='me'?'你':'TA';if(!o)return `<button class="slot${D.pick===w?' on':''}" data-w="${w}" type="button"><div class="sim"><i></i></div><b>${lab}</b><span>选一个天体</span><small>${w==='me'?'还没做题的话':'觉得 TA 像哪颗'}</small></button>`;
  const b=byId[o.id];return `<button class="slot${D.pick===w?' on':''}" data-w="${w}" type="button"><div class="sim"><img src="${b.img}" alt=""></div><b>${lab}</b><span>${b.name}</span><small>${o.est?'按天体估算 · 点击更换':(o.inv?'TA 做题的结果':'你做题的结果')}</small></button>`}
-function openDuo(){if(!D.me&&you&&curRes)D.me={id:you,a:curRes.a,v:curRes.v,est:false};if(!D.ta&&inviter)D.ta=inviter;D.pick=null;renderDuo();duoEl.scrollTop=0;duoEl.classList.add('open')}
+function openDuo(){if(!D.me&&you&&curRes)D.me={id:you,a:curRes.a,v:curRes.v,est:false};if(!D.me&&me0)D.me={...me0,est:false};if(!D.ta&&inviter)D.ta=inviter;D.pick=null;renderDuo();duoEl.scrollTop=0;duoEl.classList.add('open')}
 function renderDuo(){const tb=(D.ta&&D.ta.bd)||'';
  din.innerHTML=`<h2 style="font-size:30px">双人合盘</h2><p class="dsub">把两个人，放进同一片夜空</p>
+ ${partners.length?`<div class="plist2"><h4>合过盘的人</h4><div class="prow">${partners.map((p,i)=>`<button class="pchip${D.ta&&D.ta.k===p.k?' on':''}" data-pi="${i}" type="button"><img src="${byId[p.id].img}" alt="">TA · ${byId[p.id].name}<small>${p.from||''}</small>${p.fresh?'<i>新</i>':''}</button>`).join('')}</div></div>`:''}
  <div class="slots">${slotHTML('me')}<div class="amp">×</div>${slotHTML('ta')}</div>
  ${D.pick?`<div class="picker">${ORD.map(id=>`<button type="button" data-p="${id}" class="${D[D.pick]&&D[D.pick].id===id?'on':''}"><img src="${byId[id].img}" alt="">${byId[id].name}</button>`).join('')}</div><p class="ptip">${D.pick==='me'?'不确定的话，回去做一遍题会更准':'不确定的话，把下面的邀请链接发给 TA，让 TA 做一遍会更准'}</p>`:''}
  <div class="bdrow"><label>你的生日<input type="date" id="dbme" value="${myBd}" max="${new Date().toISOString().slice(0,10)}"></label><label>TA 的生日<input type="date" id="dbta" value="${tb}" max="${new Date().toISOString().slice(0,10)}"></label></div>
@@ -453,7 +480,7 @@ function cmpText(m,t){const out=[],da=m.a-t.a,dv=m.v-t.v;
  return out.map(x=>`<p style="margin-bottom:10px">${x}</p>`).join('')}
 function duoResult(scroll){const m=D.me,t=D.ta;if(!m||!t)return;const out=document.getElementById('dout');if(!out)return;
  const pk=PT[pairKey(m.id,t.id)],ck=catKey(m.id,t.id),C=CP[ck],bm=byId[m.id],bt=byId[t.id];
- const mb=document.getElementById('dbme').value,tb=document.getElementById('dbta').value;if(mb){myBd=mb;try{localStorage.setItem('xingti_bday',mb)}catch(e){}}t.bd=tb;
+ const mb=document.getElementById('dbme').value,tb=document.getElementById('dbta').value;if(mb){myBd=mb;try{localStorage.setItem('xingti_bday',mb)}catch(e){}}if(inviter&&mb)roomPost(mb);t.bd=tb;
  let moons='';if(mb&&tb){const fm=moonFrac(mb),ft=moonFrac(tb),lm=litPct(fm),lt=litPct(ft),PHn=f=>PH[phaseIdx(f)][0];
   const ln=lt>=100-lm-8?`你出生那晚，月亮暗着 ${100-lm}%；TA 出生那晚，月亮亮着 ${lt}%。TA 的光，刚好够照亮你暗着的那一部分。`:(lm>=100-lt-8?`TA 出生那晚，月亮暗着 ${100-lt}%；你出生那晚，月亮亮着 ${lm}%。你的光，刚好够照亮 TA 暗着的那一部分。`:`你们出生那晚，月亮都留着一些暗处。也许这样刚好：谁都不用把自己全部交出去，也能慢慢被看见。`);
   moons=`<div class="sec c"><h3>两个月亮</h3><div class="dmoons"><div><canvas id="dmm"></canvas>你<b>${PHn(fm)}</b>亮 ${lm}%</div><div><canvas id="dmt"></canvas>TA<b>${PHn(ft)}</b>亮 ${lt}%</div></div><p class="dline" style="text-align:center;margin-top:24px!important">${ln}</p></div>`}
@@ -474,9 +501,10 @@ function duoResult(scroll){const m=D.me,t=D.ta;if(!m||!t)return;const out=docume
 din.addEventListener('click',e=>{const sl=e.target.closest('.slot');if(sl){D.pick=D.pick===sl.dataset.w?null:sl.dataset.w;const keep=[document.getElementById('dbme').value,document.getElementById('dbta').value];renderDuo();document.getElementById('dbme').value=keep[0];document.getElementById('dbta').value=keep[1];return}
  const pb=e.target.closest('[data-p]');if(pb){const id=pb.dataset.p,w=D.pick,e2=EST[id];const keep=[document.getElementById('dbme').value,document.getElementById('dbta').value];D[w]={id,a:e2[0],v:e2[1],est:true};D.pick=null;renderDuo();document.getElementById('dbme').value=keep[0];document.getElementById('dbta').value=keep[1];return}
  if(e.target.id==='dgo'){if(!D.me||!D.ta){D.pick=!D.me?'me':'ta';const keep=[document.getElementById('dbme').value,document.getElementById('dbta').value];renderDuo();document.getElementById('dbme').value=keep[0];document.getElementById('dbta').value=keep[1];return}duoResult(true);return}
+ const pc=e.target.closest('[data-pi]');if(pc){const p=partners[+pc.dataset.pi];if(p){p.fresh=false;savePartners();D.ta={...p,est:false,inv:true};D.pick=null;renderDuo();duoResult(true)}return}
  if(e.target.id==='dunl'){openPay(cur,'duo');return}
  if(e.target.id==='duook'&&++okTap>=5){okTap=0;memDuo=false;try{localStorage.removeItem(DPAID)}catch(x){}duoResult(false);return}
- if(e.target.id==='dshare'){const bd=(document.getElementById('dbme').value||'').replace(/-/g,'');const url=location.href.split('#')[0]+`#h=${D.me.id}.${D.me.a}.${D.me.v}${bd?'.'+bd:''}`;const sh=document.getElementById('dsh');let ok=false;try{navigator.clipboard.writeText(url).then(()=>{sh.textContent='已复制，发给 TA 就好：'+url},()=>{sh.textContent='长按复制这个链接发给 TA：'+url})}catch(x){sh.textContent='长按复制这个链接发给 TA：'+url}}});
+ if(e.target.id==='dshare'){const bd=(document.getElementById('dbme').value||'').replace(/-/g,'');let room=lsg('xingti_room');if(!/^[A-HJ-NP-Z2-9]{8}$/.test(room||'')){room=code8();lss('xingti_room',room)}const url=location.href.split('#')[0]+`#h=${D.me.id}.${D.me.a}.${D.me.v}.${bd||'x'}.${room}`;const sh=document.getElementById('dsh');let ok=false;try{navigator.clipboard.writeText(url).then(()=>{sh.textContent='已复制，发给 TA 就好。TA 测完后，你再打开这个网站就能直接看到你们的合盘：'+url},()=>{sh.textContent='长按复制这个链接发给 TA：'+url})}catch(x){sh.textContent='长按复制这个链接发给 TA：'+url}}});
 document.getElementById('dclose').onclick=()=>duoEl.classList.remove('open');
 document.getElementById('duoBtn').onclick=()=>openDuo();
 cv.addEventListener('wheel',e=>{e.preventDefault();anim=null;zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*.0015));hint.classList.add('gone')},{passive:false});
